@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "@fontsource-variable/literata";
+
+@theme {
+  --font-display: "Literata Variable", Georgia, "Times New Roman", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --color-paper: #f3f5f7;
+  --color-surface: #ffffff;
+  --color-ink: #14212b;
+  --color-muted: #566673;
+  --color-line: #d8dfe5;
+  --color-accent: #1d5c63;
+  --color-accent-soft: #e3eff0;
+  --color-ok: #1f7a4d;
+  --color-warn: #8a5300;
+  --color-danger: #b3261e;
+  --color-danger-soft: #fbe9e7;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

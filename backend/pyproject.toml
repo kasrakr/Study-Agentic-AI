@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "study-ai-agent-backend"
+version = "0.1.0"
+description = "Document-first agentic RAG backend for the Study AI Agent"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30,<1",
+    "pydantic>=2.8,<3",
+    "pydantic-settings>=2.4,<3",
+    "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0,<3",
+    "openai>=1.40",
+    "langchain-core>=1.0,<2",
+    "langchain-openai>=1.0,<2",
+    "langchain-chroma>=1.0,<2",
+    "langchain-text-splitters>=1.0,<2",
+    "chromadb>=1.0,<2",
+    "pymupdf>=1.24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+    "httpx>=0.27,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]

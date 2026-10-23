@@ -1,0 +1,44 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Local data (uploaded user files, databases, vector store)
+storage/uploads/*
+storage/vectorstore/*
+storage/*.db
+storage/*.sqlite*
+!storage/uploads/.gitkeep
+!storage/vectorstore/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.tsbuildinfo
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
