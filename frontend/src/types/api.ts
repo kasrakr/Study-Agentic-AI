@@ -10,6 +10,7 @@ export interface HealthStatus {
   status: "ok";
   version: string;
   openai_configured: boolean;
+  openai_base_url: string;
   tavily_configured: boolean;
   chat_model: string;
   embedding_model: string;

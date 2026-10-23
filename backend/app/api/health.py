@@ -22,6 +22,7 @@ def health(
         "version": __version__,
         "openai_configured": settings.openai_configured,
         "tavily_configured": settings.tavily_configured,
+        "openai_base_url": settings.openai_base_url,
         "chat_model": settings.openai_chat_model,
         "embedding_model": settings.openai_embedding_model,
         "indexed_documents": documents.count_indexed(),

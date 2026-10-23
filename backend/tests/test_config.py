@@ -42,3 +42,14 @@ def test_relative_paths_resolve_against_repo_root():
 def test_cors_origins_parsed_from_comma_list():
     s = _settings(cors_origins="http://a.test, http://b.test ,")
     assert s.cors_origin_list == ["http://a.test", "http://b.test"]
+
+
+def test_base_url_defaults_to_gapgpt_and_trailing_slash_is_stripped():
+    assert _settings().openai_base_url == "https://api.gapgpt.app/v1"
+    assert _settings(openai_base_url=" https://proxy.test/v1/ ").openai_base_url == "https://proxy.test/v1"
+
+
+@pytest.mark.parametrize("bad", ["api.gapgpt.app/v1", "ftp://x.test", "https://"])
+def test_invalid_base_url_fails_startup_validation(bad):
+    with pytest.raises(ConfigurationError, match="OPENAI_BASE_URL"):
+        _settings(openai_api_key="sk-test-123456", openai_base_url=bad).validate_for_startup()

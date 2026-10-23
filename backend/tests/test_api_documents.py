@@ -17,6 +17,7 @@ def vectors(client, doc_id):
 def test_health_reports_status_without_secrets(client):
     body = client.get("/api/health").json()
     assert body["status"] == "ok" and body["openai_configured"] is True
+    assert body["openai_base_url"] == "https://api.gapgpt.app/v1"
     assert TEST_KEY not in str(body)
 
 

@@ -30,6 +30,7 @@ def get_chat_model(settings: Settings, *, temperature: float = 0.0) -> ChatOpenA
     return ChatOpenAI(
         model=settings.openai_chat_model,
         api_key=settings.openai_api_key,
+        base_url=settings.openai_base_url,
         timeout=settings.openai_timeout_seconds,
         max_retries=0,
         **kwargs,

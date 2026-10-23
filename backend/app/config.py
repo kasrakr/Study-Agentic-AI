@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlparse
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -40,6 +41,9 @@ class Settings(BaseSettings):
 
     # --- OpenAI (default and only implemented provider) ---
     openai_api_key: SecretStr | None = None
+    # OpenAI-compatible endpoint used for chat AND embeddings. The API key must be
+    # valid for this endpoint. Set to https://api.openai.com/v1 to use OpenAI directly.
+    openai_base_url: str = "https://api.gapgpt.app/v1"
     openai_chat_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_timeout_seconds: float = Field(60.0, gt=0)
@@ -79,6 +83,11 @@ class Settings(BaseSettings):
     generation_context_chunks: int = Field(24, ge=4, le=80)  # passages sampled per generation
 
     log_level: str = "INFO"
+
+    @field_validator("openai_base_url", mode="after")
+    @classmethod
+    def _strip_base_url(cls, value: str) -> str:
+        return value.strip().rstrip("/")
 
     @field_validator("openai_api_key", "tavily_api_key", mode="before")
     @classmethod
@@ -134,6 +143,9 @@ class Settings(BaseSettings):
                 "OPENAI_API_KEY is not set. Copy backend/.env.example to backend/.env "
                 "and add a key from https://platform.openai.com/api-keys"
             )
+        parsed = urlparse(self.openai_base_url.strip())
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            problems.append("OPENAI_BASE_URL must be a full http(s) URL, e.g. https://api.gapgpt.app/v1")
         if not self.openai_chat_model.strip():
             problems.append("OPENAI_CHAT_MODEL must not be empty.")
         if not self.openai_embedding_model.strip():

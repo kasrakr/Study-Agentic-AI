@@ -18,6 +18,7 @@ def get_embeddings(settings: Settings) -> OpenAIEmbeddings:
     return OpenAIEmbeddings(
         model=settings.openai_embedding_model,
         api_key=settings.openai_api_key,
+        base_url=settings.openai_base_url,
         request_timeout=settings.openai_timeout_seconds,
         max_retries=0,
         # Chunks are a few hundred tokens, far below the model's input limit, so

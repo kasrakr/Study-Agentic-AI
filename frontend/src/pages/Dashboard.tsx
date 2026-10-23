@@ -140,6 +140,7 @@ export default function Dashboard() {
               <Row label="OpenAI API key">
                 <Flag ok={health.data.openai_configured} yes="Configured" no="Missing" />
               </Row>
+              <Row label="Model endpoint">{health.data.openai_base_url}</Row>
               <Row label="Chat model">{health.data.chat_model}</Row>
               <Row label="Embedding model">{health.data.embedding_model}</Row>
               <Row label="Indexed documents">{health.data.indexed_documents}</Row>
