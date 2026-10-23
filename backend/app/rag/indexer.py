@@ -95,6 +95,18 @@ class VectorIndex:
         found = self._store.get(where={"document_id": document_id}, include=[])
         return len(found["ids"])
 
+    def list_chunks(self, document_ids: list[str]) -> list[tuple[str, dict]]:
+        """All stored chunks (text, metadata) of the given documents, in document then reading order."""
+        order = {doc_id: i for i, doc_id in enumerate(document_ids)}
+        where = (
+            {"document_id": document_ids[0]} if len(document_ids) == 1
+            else {"document_id": {"$in": document_ids}}
+        )
+        found = self._store.get(where=where, include=["documents", "metadatas"])
+        rows = list(zip(found["documents"], found["metadatas"]))
+        rows.sort(key=lambda r: (order.get(r[1]["document_id"], 0), int(r[1].get("chunk_index", 0))))
+        return [(text, dict(meta)) for text, meta in rows]
+
     def search(
         self, query: str, *, k: int, document_ids: list[str] | None = None
     ) -> list[tuple[str, dict, float]]:

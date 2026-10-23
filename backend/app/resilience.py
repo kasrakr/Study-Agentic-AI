@@ -47,3 +47,66 @@ def call_openai(
             logger.info("Transient OpenAI error (%s); retrying in %.1fs", translated.code, delay)
             sleep(delay)
             attempt += 1
+
+
+def invoke_structured(chat_model, schema, system: str, human: str, *, max_retries: int):  # noqa: ANN001
+    """One structured-output LLM call, validated against `schema`.
+
+    Raises a sanitized AppError if the provider fails or returns something that
+    is not an instance of the schema.
+    """
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    structured = chat_model.with_structured_output(schema)
+    messages = [SystemMessage(content=system), HumanMessage(content=human)]
+    try:
+        result = call_openai(lambda: structured.invoke(messages), max_retries=max_retries)
+    except AppError:
+        raise
+    except Exception as exc:
+        logger.exception("Structured output call failed (%s)", schema.__name__)
+        raise AppError(
+            "The model returned an unusable response. Please try again.",
+            status_code=502, code="invalid_model_output",
+        ) from exc
+    if not isinstance(result, schema):
+        raise AppError(
+            "The model returned an unusable response. Please try again.",
+            status_code=502, code="invalid_model_output",
+        )
+    return result
+
+
+def stream_text(
+    chat_model,  # noqa: ANN001
+    messages: list,
+    *,
+    on_token: Callable[[str], None],
+    max_retries: int,
+    base_delay: float = 1.0,
+) -> str:
+    """Stream a plain-text completion, forwarding tokens to `on_token`.
+
+    Retries are only allowed while nothing has been emitted yet; once the
+    student has seen tokens, a retry would duplicate text, so the error is raised.
+    """
+    attempt = 0
+    while True:
+        parts: list[str] = []
+        try:
+            for chunk in chat_model.stream(messages):
+                text = chunk.content if isinstance(chunk.content, str) else ""
+                if text:
+                    parts.append(text)
+                    on_token(text)
+            return "".join(parts)
+        except AppError:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            if not is_openai_error(exc):
+                raise
+            translated = translate_openai_error(exc)
+            if parts or not translated.retryable or attempt >= max_retries:
+                raise translated from exc
+            time.sleep(base_delay * (2**attempt))
+            attempt += 1

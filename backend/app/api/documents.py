@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Response, UploadFile
+from fastapi.responses import FileResponse
 
 from app.config import Settings
 from app.dependencies import get_app_settings, get_document_service
-from app.errors import AppError
+from app.errors import AppError, NotFoundError
 from app.schemas.common import ErrorResponse
 from app.schemas.documents import (
     DeleteResponse,
@@ -62,6 +63,26 @@ def get_document(
     document_id: str, service: DocumentService = Depends(get_document_service)
 ) -> DocumentOut:
     return DocumentOut.model_validate(service.get_document(document_id))
+
+
+_MEDIA_TYPES = {"pdf": "application/pdf", "txt": "text/plain; charset=utf-8", "md": "text/plain; charset=utf-8"}
+
+
+@router.get("/{document_id}/file", responses=_ERRORS)
+def get_document_file(
+    document_id: str,
+    service: DocumentService = Depends(get_document_service),
+    settings: Settings = Depends(get_app_settings),
+) -> FileResponse:
+    """Serve the original file inline so citations can link to it (PDFs support `#page=N`)."""
+    doc = service.get_document(document_id)
+    path = settings.upload_path / doc.stored_filename
+    if not path.is_file():
+        raise NotFoundError("The stored file is not available.", details={"document_id": document_id})
+    return FileResponse(
+        path, media_type=_MEDIA_TYPES[doc.file_type], content_disposition_type="inline",
+        filename=doc.filename, headers={"X-Content-Type-Options": "nosniff"},
+    )
 
 
 @router.delete("/{document_id}", response_model=DeleteResponse, responses=_ERRORS)

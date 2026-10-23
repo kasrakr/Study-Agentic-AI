@@ -22,7 +22,7 @@ def test_health_reports_status_without_secrets(client):
 
 def test_openai_health_uses_both_models(client, embeddings, chat_model):
     body = client.get("/api/health/openai").json()
-    assert body["ok"] is True and embeddings.calls == 1 and chat_model.calls == 1
+    assert body["ok"] is True and embeddings.calls == 1 and chat_model.calls["invoke"] == 1
 
 
 def test_upload_pdf_indexes_and_lists_document(client, settings):

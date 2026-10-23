@@ -45,14 +45,17 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = Field(60.0, gt=0)
     openai_max_retries: int = Field(2, ge=0, le=5)
 
-    # --- Tavily (separate key; wired up in Phase 4) ---
+    # --- Tavily web search (separate key; never the OpenAI key) ---
     tavily_api_key: SecretStr | None = None
+    tavily_max_results: int = Field(5, ge=1, le=10)
+    tavily_timeout_seconds: float = Field(10.0, gt=0)
 
     # --- Storage ---
     database_url: str = "sqlite:///storage/study.db"
     chroma_persist_directory: str = "storage/vectorstore"
     upload_directory: str = "storage/uploads"
     chroma_collection_name: str = "study_documents"
+    checkpoint_database: str = "storage/checkpoints.sqlite"  # LangGraph conversation state
 
     # --- API / ingestion ---
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
@@ -65,6 +68,15 @@ class Settings(BaseSettings):
     # --- Retrieval ---
     retrieval_top_k: int = Field(6, ge=1, le=30)
     retrieval_min_score: float = Field(0.0, ge=0.0, le=1.0)
+    # Top similarity below this is a "weak retrieval" signal that triggers a query rewrite.
+    retrieval_weak_score: float = Field(0.25, ge=0.0, le=1.0)
+    max_retrieval_retries: int = Field(1, ge=0, le=2)  # query rewrites per question
+    agent_history_messages: int = Field(6, ge=0, le=20)  # prior messages given to the classifier
+
+    # --- Quizzes / flashcards ---
+    quiz_max_questions: int = Field(20, ge=1, le=50)
+    flashcard_max_cards: int = Field(30, ge=1, le=100)
+    generation_context_chunks: int = Field(24, ge=4, le=80)  # passages sampled per generation
 
     log_level: str = "INFO"
 
@@ -84,6 +96,10 @@ class Settings(BaseSettings):
     @property
     def max_upload_bytes(self) -> int:
         return self.max_upload_size_mb * 1024 * 1024
+
+    @property
+    def checkpoint_path(self) -> Path:
+        return _resolve(self.checkpoint_database)
 
     @property
     def upload_path(self) -> Path:
@@ -130,6 +146,7 @@ class Settings(BaseSettings):
     def ensure_directories(self) -> None:
         self.upload_path.mkdir(parents=True, exist_ok=True)
         self.chroma_path.mkdir(parents=True, exist_ok=True)
+        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
         if self.sqlalchemy_url.startswith(SQLITE_PREFIX):
             raw = self.sqlalchemy_url[len(SQLITE_PREFIX) :]
             if raw and raw != ":memory:":

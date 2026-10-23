@@ -6,6 +6,7 @@ Run with:  uvicorn app.main:create_app --factory --reload
 from __future__ import annotations
 
 import logging
+import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -15,10 +16,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
+from langgraph.checkpoint.sqlite import SqliteSaver
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
-from app.api import chat, documents, health
+from app.agent.graph import build_graph
+from app.agent.nodes import AgentDeps
+from app.api import chat, documents, flashcards, health, quizzes
 from app.config import Settings, get_settings
 from app.db.database import create_db_engine, init_db, make_session_factory
 from app.errors import AppError
@@ -26,7 +30,9 @@ from app.llm import get_chat_model
 from app.logging_config import configure_logging
 from app.rag.embeddings import get_embeddings
 from app.rag.indexer import VectorIndex
+from app.services.chat_service import ChatService
 from app.services.document_service import DocumentService
+from app.services.web_search import TavilySearch, WebSearchProvider
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +49,12 @@ def create_app(
     *,
     embeddings: Embeddings | None = None,
     chat_model: BaseChatModel | None = None,
+    web_search: WebSearchProvider | None | str = "auto",
 ) -> FastAPI:
-    """`embeddings` / `chat_model` let tests inject fakes; production uses OpenAI."""
+    """`embeddings` / `chat_model` / `web_search` let tests inject fakes.
+
+    web_search="auto" builds Tavily from TAVILY_API_KEY (or None if unset);
+    passing None explicitly disables the web fallback."""
     settings = settings or get_settings()
 
     @asynccontextmanager
@@ -72,6 +82,25 @@ def create_app(
             embedding_model_name=settings.openai_embedding_model,
             max_retries=settings.openai_max_retries,
         )
+        if web_search == "auto":
+            search: WebSearchProvider | None = (
+                TavilySearch(settings.tavily_api_key, timeout_seconds=settings.tavily_timeout_seconds)
+                if settings.tavily_api_key is not None else None
+            )
+        else:
+            search = web_search  # type: ignore[assignment]
+        app.state.web_search = search
+
+        # Conversation state persists in SQLite so chats survive restarts.
+        checkpoint_conn = sqlite3.connect(str(settings.checkpoint_path), check_same_thread=False)
+        checkpointer = SqliteSaver(checkpoint_conn)
+        graph = build_graph(
+            AgentDeps(settings=settings, index=app.state.vector_index, chat_model=app.state.chat_model,
+                      web_search=search, session_factory=session_factory),
+            checkpointer,
+        )
+        app.state.chat_service = ChatService(graph, checkpointer, session_factory)
+
         with session_factory() as session:
             recovered = DocumentService(session, app.state.vector_index, settings).recover_interrupted()
             if recovered:
@@ -81,6 +110,7 @@ def create_app(
             __version__, settings.openai_chat_model, settings.openai_embedding_model,
         )
         yield
+        checkpoint_conn.close()
         engine.dispose()
 
     app = FastAPI(
@@ -122,4 +152,7 @@ def create_app(
     app.include_router(health.router)
     app.include_router(documents.router)
     app.include_router(chat.router)
+    app.include_router(chat.conversations)
+    app.include_router(quizzes.router)
+    app.include_router(flashcards.router)
     return app
