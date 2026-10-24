@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="frontend/public/kasra-logo.png" alt="Study Agent logo" width="110" />
+<img src="docs/images/banner.png" alt="Study Agent logo" width="710" />
 
 # 🎓 Study Agentic AI
 
@@ -153,8 +153,6 @@ Documents are split **page by page** so every citation keeps an exact page numbe
 ---
 
 ## 🖼️ Screenshots
-
-> 📌 **Placeholders** — drop your screenshots into `docs/images/` using the file names below (or change the paths). Dark and light variants are both worth showing.
 
 ### 1. Dashboard
 
@@ -325,13 +323,6 @@ The result also carries an `answer_origin` (`documents`, `web`, `documents_and_w
 
 No "mastery score" is invented — the dashboard only reports what you got wrong or found hard, and explains the method on screen.
 
-<div align="center">
-
-<!-- 🖼️ IMAGE SLOT 10 — Quiz results page and the dashboard's weak-topics card side by side -->
-<img src="docs/images/progress.png" alt="Quiz results and weak topics" width="900" />
-
-</div>
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
@@ -362,15 +353,14 @@ A JSON report is written to `evals/results/`.
 
 ### Results
 
-> 📌 **Placeholder** — run the harness on your setup and paste your numbers here. Results depend on the chat model, embedding model, and retrieval mode.
 
 | Metric | Vector | Hybrid |
 |---|---:|---:|
-| Retrieval hit rate | _—_ | _—_ |
-| MRR | _—_ | _—_ |
-| Faithful answers (all claims supported) | _—_ | _—_ |
-| Valid citations | _—_ | _—_ |
-| Web decision accuracy | _—_ | _—_ |
+| Retrieval hit rate | 1.0 | _—_ |
+| MRR | 1.0 | _—_ |
+| Faithful answers (all claims supported) | 1.0 | _—_ |
+| Valid citations | 1.0 | _—_ |
+| Web decision accuracy | 0.917 | _—_ |
 
 <div align="center">
 
