@@ -84,7 +84,9 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
       <div className="mt-auto space-y-3">
         {!collapsed && (
           <p className="px-1 text-xs leading-relaxed text-faint">
-            Single-user local app. Your files stay on this machine; questions and document text are sent to OpenAI.
+            Your files stay on this machine; questions and document text are sent to OpenAI.
+            <br />
+            Made by Kasra Karimian
           </p>
         )}
         <button
