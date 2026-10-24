@@ -2,7 +2,7 @@ import { BookOpenText, FileText, FileUp, Layers, ListChecks, MessageSquareText, 
 import { Link } from "react-router-dom";
 import SystemStatus from "@/components/dashboard/SystemStatus";
 import { buttonClass } from "@/components/ui/Button";
-import { Notice, PageHeader, Skeleton, Spinner } from "@/components/ui/feedback";
+import { Notice, Skeleton, Spinner } from "@/components/ui/feedback";
 import { useAsync } from "@/hooks/useAsync";
 import { api } from "@/lib/api";
 import { plural, timeAgo } from "@/lib/format";
@@ -133,9 +133,18 @@ export default function Dashboard() {
   const progress = useAsync((signal) => api.progress(signal));
   return (
     <div>
-      <PageHeader title="Dashboard">
-        <span className="inline-flex items-center gap-2"><BookOpenText className="size-4 text-accent" aria-hidden /> Your study progress at a glance.</span>
-      </PageHeader>
+      <header className="mb-8 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-gradient text-3xl font-semibold tracking-tight sm:text-[2.1rem]">Dashboard</h1>
+          <p className="mt-2 inline-flex items-center gap-2 leading-relaxed text-muted">
+            <BookOpenText className="size-4 shrink-0 text-accent" aria-hidden /> Your study progress at a glance.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <img src="/kasra-logo.png" alt="" className="h-11 w-16 object-contain" />
+          <span className="text-gradient text-3xl font-semibold tracking-tight sm:text-[2.1rem]">Kasra Karimian</span>
+        </div>
+      </header>
 
       {progress.status === "loading" && (
         <div className="space-y-3">
