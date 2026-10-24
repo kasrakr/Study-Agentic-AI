@@ -23,7 +23,7 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-accent px-4 py-2.5 text-white">{message.content}</p>
+        <p className="message-user whitespace-pre-wrap rounded-2xl rounded-br-sm px-4 py-3">{message.content}</p>
       </div>
     );
   }
@@ -37,7 +37,7 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
   }
 
   return (
-    <article className="rounded-2xl rounded-bl-sm border border-line bg-surface px-4 py-3.5" aria-label="Assistant answer" aria-busy={streaming}>
+    <article className="message-assistant rounded-2xl rounded-bl-sm border border-line bg-surface px-5 py-4" aria-label="Assistant answer" aria-busy={streaming}>
       <AgentTimeline steps={message.steps} streaming={streaming} />
 
       {message.content && (

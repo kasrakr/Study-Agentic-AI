@@ -1,6 +1,6 @@
-import { ChevronDown, Sparkles } from "lucide-react";
+import { BookOpenText, BrainCircuit, FileQuestion, Layers, ChevronDown, Sparkles, UploadCloud } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Composer from "@/components/chat/Composer";
 import ConversationList from "@/components/chat/ConversationList";
 import MessageBubble from "@/components/chat/MessageBubble";
@@ -13,9 +13,10 @@ import { api } from "@/lib/api";
 import { errorMessage, plural } from "@/lib/format";
 
 const STARTERS = [
-  "Summarize the key ideas in my documents",
-  "Explain the hardest concept in my notes in simple terms",
-  "Quiz me on my documents",
+  { icon: BookOpenText, title: "Explain a difficult concept", prompt: "Explain a difficult concept from my study materials in simple terms." },
+  { icon: FileQuestion, title: "Build an exam-style quiz", prompt: "Quiz me on the most important ideas in my documents." },
+  { icon: BrainCircuit, title: "Find the key ideas", prompt: "Summarize the key ideas in my documents and explain how they connect." },
+  { icon: Layers, title: "Create revision flashcards", prompt: "Create flashcards for the most important concepts in my documents." },
 ];
 
 export default function StudyChat() {
@@ -41,7 +42,10 @@ export default function StudyChat() {
 
   const lastLength = chat.messages.at(-1)?.content.length ?? 0;
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
+    bottomRef.current?.scrollIntoView({
+      block: "end",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
   }, [chat.messages.length, lastLength]);
 
   const indexedCount = docs.indexed.length;
@@ -62,8 +66,12 @@ export default function StudyChat() {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-[15rem_1fr]">
-      <aside>
+    <div className="study-chat-layout grid gap-5 md:grid-cols-[13.5rem_minmax(0,1fr)] xl:grid-cols-[14.5rem_minmax(0,1fr)]">
+      <aside className="conversation-rail">
+        <div className="mb-3 hidden items-center justify-between px-1 md:flex">
+          <span className="text-[10px] font-bold tracking-[0.15em] text-slate-500">YOUR CHATS</span>
+          <span className="rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[10px] text-slate-500">{conversations.data?.conversations.length ?? 0}</span>
+        </div>
         <details className="md:hidden" open={false}>
           <summary className="cursor-pointer rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium">Conversations</summary>
           <div className="mt-2">
@@ -75,41 +83,69 @@ export default function StudyChat() {
           <ConversationList conversations={conversations.data?.conversations ?? []} activeId={chat.conversationId}
             onOpen={chat.open} onDelete={removeConversation} onNew={chat.reset} />
         </div>
+        <div className="mt-5 hidden border-t border-white/[0.07] pt-4 md:block">
+          <p className="px-1 text-[10px] font-bold tracking-[0.13em] text-slate-600">QUICK NOTE</p>
+          <p className="mt-2 px-1 text-xs leading-relaxed text-slate-500">Answers prioritize indexed documents, with citations to help you verify the details.</p>
+        </div>
       </aside>
 
-      <section className="flex min-h-[70vh] min-w-0 flex-col" aria-label="Study chat">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Study chat</h1>
-        <p className="mt-1 text-sm text-muted">
-          Answers come from your uploaded documents first. The web is searched only if they don’t contain enough.
-        </p>
+      <section className="chat-section flex min-w-0 flex-col" aria-label="Study chat">
+        <header className="mb-5">
+          <div className="chat-heading-row">
+            <div className="min-w-0">
+              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.17em] text-sky-300">
+                <span className="size-1.5 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.75)]" aria-hidden />
+                Your learning workspace
+              </div>
+              <h1 className="chat-heading font-display font-semibold">Study chat</h1>
+              <p className="chat-subtitle mt-2 text-sm">
+                Ask questions, explore ideas, and turn your documents into a deeper understanding.
+              </p>
+            </div>
+            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 text-[11px] text-slate-400 sm:flex">
+              <BookOpenText className="size-3.5 text-sky-300" aria-hidden />
+              <span>{indexedCount} indexed {indexedCount === 1 ? "document" : "documents"}</span>
+            </div>
+          </div>
+        </header>
 
-        <details className="mt-3 rounded-lg border border-line bg-surface px-3 py-2">
-          <summary className="flex cursor-pointer list-none items-center gap-2 text-sm">
-            <ChevronDown className="size-4" aria-hidden /> {docs.status === "loading" ? "Loading documents…" : scopeLabel}
+        <details className="document-scope mb-3 px-3" open={false}>
+          <summary className="flex list-none items-center gap-2 text-sm text-slate-300">
+            <ChevronDown className="size-4 text-sky-300" aria-hidden />
+            <span>{docs.status === "loading" ? "Loading documents…" : scopeLabel}</span>
+            <span className="ml-auto text-xs text-slate-500">Sources</span>
           </summary>
-          <div className="mt-3">
+          <div className="border-t border-white/[0.07] pb-3 pt-3">
             <DocumentPicker documents={docs.indexed} selected={scope} onChange={setScope} legend="Limit to these documents (none selected = all)" />
           </div>
         </details>
 
-        {(chat.loadError || actionError) && <Notice tone="error" className="mt-3">{chat.loadError ?? actionError}</Notice>}
+        {(chat.loadError || actionError) && <Notice tone="error" className="mb-3">{chat.loadError ?? actionError}</Notice>}
 
-        <div className="mt-4 flex-1 space-y-4" role="log" aria-live="off" aria-label="Conversation">
+        <div className="conversation-stream custom-scrollbar flex-1 space-y-4" role="log" aria-live="off" aria-label="Conversation">
           {chat.messages.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-line bg-surface px-5 py-8 text-center">
-              <Sparkles className="mx-auto size-7 text-accent" aria-hidden />
-              <h2 className="mt-2 font-display text-lg font-semibold">Ask anything about your materials</h2>
-              <p className="mx-auto mt-1 max-w-md text-sm text-muted">
-                {indexedCount === 0 ? "You haven’t indexed any documents yet. Upload some in the Library for page-level citations." : "Try one of these, or type your own question."}
+            <div className="chat-empty-state">
+              <div className="chat-orb" aria-hidden><Sparkles className="size-7" strokeWidth={1.6} /></div>
+              <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-300/90">A smarter way to study</p>
+              <h2 className="chat-empty-title font-display font-semibold">What are you studying today?</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-400">
+                Your study companion can explain complex ideas, connect concepts, and help you prepare for your next exam.
               </p>
-              {indexedCount > 0 && (
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {STARTERS.map((s) => (
-                    <button key={s} type="button" onClick={() => void chat.send(s, scope)}
-                            className="rounded-full border border-line px-3 py-1.5 text-sm hover:border-accent hover:bg-accent-soft">
-                      {s}
+              {indexedCount > 0 ? (
+                <div className="prompt-grid">
+                  {STARTERS.map(({ icon: Icon, title, prompt }) => (
+                    <button key={title} type="button" onClick={() => void chat.send(prompt, scope)} className="prompt-suggestion">
+                      <Icon className="size-[18px]" strokeWidth={1.8} aria-hidden />
+                      <span className="min-w-0 flex-1">{title}</span>
                     </button>
                   ))}
+                </div>
+              ) : (
+                <div className="mt-5 flex flex-col items-center gap-3">
+                  <p className="max-w-sm text-xs leading-relaxed text-slate-500">Upload lecture notes or a PDF to unlock document-grounded answers and page-level citations.</p>
+                  <Link to="/library" className="inline-flex items-center gap-2 rounded-xl border border-blue-400/25 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-100 transition hover:border-blue-300/45 hover:bg-blue-500/15">
+                    <UploadCloud className="size-4" aria-hidden /> Add study materials
+                  </Link>
                 </div>
               )}
             </div>
@@ -119,9 +155,11 @@ export default function StudyChat() {
           <div ref={bottomRef} />
         </div>
 
-        <div className="sticky bottom-0 mt-4 bg-paper pb-2 pt-2">
+        <div className="composer-dock">
           <Composer busy={chat.busy} onSend={(q) => void chat.send(q, scope)} onStop={chat.stop} />
-          <p className="mt-1.5 text-center text-xs text-muted">Answers can contain mistakes. Check the cited sources.</p>
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-center composer-hint">
+            <span>Enter to send</span><span className="text-slate-700">·</span><span>Shift + Enter for a new line</span>
+          </p>
         </div>
       </section>
     </div>
