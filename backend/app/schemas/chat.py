@@ -99,6 +99,7 @@ class StoredMessage(BaseModel):
     retrieval_path: list[str] = []
     web_search_used: bool = False
     limitations: str | None = None
+    artifact: Artifact | None = None
 
 
 class ConversationDetail(BaseModel):

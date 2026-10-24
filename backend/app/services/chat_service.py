@@ -49,10 +49,14 @@ class ChatService:
         self.checkpointer = checkpointer
         self.session_factory = session_factory
         self._locks: dict[str, threading.Lock] = defaultdict(threading.Lock)
+        # LangChain callbacks attached to every run (the evaluation harness uses this to count tokens).
+        self.callbacks: list[Any] = []
 
-    @staticmethod
-    def _config(conversation_id: str) -> dict[str, Any]:
-        return {"configurable": {"thread_id": conversation_id}}
+    def _config(self, conversation_id: str) -> dict[str, Any]:
+        config: dict[str, Any] = {"configurable": {"thread_id": conversation_id}}
+        if self.callbacks:
+            config["callbacks"] = self.callbacks
+        return config
 
     # ---------------------------------------------------------- running
     def answer(self, question: str, conversation_id: str | None, document_ids: list[str] | None) -> ChatResponse:
@@ -169,6 +173,7 @@ class ChatService:
                     citations=[Citation(**c) for c in extra.get("citations", [])],
                     answer_origin=extra.get("answer_origin"), retrieval_path=extra.get("retrieval_path", []),
                     web_search_used=extra.get("web_search_used", False), limitations=extra.get("limitations"),
+                    artifact=Artifact(**extra["artifact"]) if extra.get("artifact") else None,
                 ))
         return ConversationDetail(conversation=summary, messages=messages)
 

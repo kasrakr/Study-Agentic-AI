@@ -1,158 +1,151 @@
-import { CheckCircle2, CircleAlert, Loader2, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
-import { useState } from "react";
+import { BookOpenText, FileUp, Layers, ListChecks, MessageSquareText, Target } from "lucide-react";
+import { Link } from "react-router-dom";
+import SystemStatus from "@/components/dashboard/SystemStatus";
+import { Button } from "@/components/ui/Button";
+import { Notice, PageHeader, Spinner } from "@/components/ui/feedback";
 import { useAsync } from "@/hooks/useAsync";
-import { API_BASE_URL, api } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import type { OpenAIHealth, ProbeResult } from "@/types/api";
+import { api } from "@/lib/api";
+import { plural, timeAgo } from "@/lib/format";
+import type { ActivityItem, Progress } from "@/types/api";
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-line py-3 last:border-b-0">
+    <div className="rounded-lg border border-line bg-surface px-4 py-3.5">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className="text-right text-sm font-medium">{children}</dd>
+      <dd className="mt-1 font-display text-2xl font-semibold">{value}</dd>
+      {hint && <p className="text-xs text-muted">{hint}</p>}
     </div>
   );
 }
 
-function Flag({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
-  const Icon = ok ? CheckCircle2 : CircleAlert;
+const ACTIVITY_LINK: Record<ActivityItem["type"], (id: string) => string> = {
+  upload: () => "/library",
+  chat: (id) => `/chat?c=${id}`,
+  quiz: (id) => `/quiz?quiz=${id}`,
+  flashcards: (id) => `/flashcards?deck=${id}`,
+};
+const ACTIVITY_VERB: Record<ActivityItem["type"], string> = { upload: "Document", chat: "Chat", quiz: "Quiz", flashcards: "Flashcards" };
+
+function Overview({ p }: { p: Progress }) {
+  const avg = p.quiz.average_score_percent;
+  const empty = p.indexed_documents === 0;
   return (
-    <span className={cn("inline-flex items-center gap-1.5", ok ? "text-ok" : "text-warn")}>
-      <Icon className="size-4" aria-hidden />
-      {ok ? yes : no}
-    </span>
-  );
-}
+    <>
+      <dl className="grid gap-3 sm:grid-cols-3">
+        <Stat label="Indexed documents" value={String(p.indexed_documents)} />
+        <Stat label="Average quiz score" value={avg == null ? "—" : `${Math.round(avg)}%`} hint={plural(p.quiz.attempts, "attempt")} />
+        <Stat label="Flashcards rated" value={String(p.flashcards.rated)} hint={p.flashcards.rated ? `${p.flashcards.difficult} difficult` : undefined} />
+      </dl>
 
-function ProbeLine({ name, probe }: { name: string; probe: ProbeResult }) {
-  return (
-    <li className="flex items-start gap-2 py-1.5 text-sm">
-      {probe.ok ? (
-        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden />
-      ) : (
-        <XCircle className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden />
-      )}
-      <span>
-        <span className="font-medium">{name}</span> <span className="text-muted">({probe.model})</span>
-        {probe.ok ? " works." : ` failed: ${probe.error?.message ?? "unknown error"}`}
-      </span>
-    </li>
-  );
-}
-
-function OpenAICheck() {
-  const [state, setState] = useState<
-    { status: "idle" } | { status: "running" } | { status: "done"; result: OpenAIHealth } | { status: "error"; message: string }
-  >({ status: "idle" });
-
-  async function run() {
-    setState({ status: "running" });
-    try {
-      setState({ status: "done", result: await api.verifyOpenAI() });
-    } catch (err) {
-      setState({ status: "error", message: err instanceof Error ? err.message : "Check failed." });
-    }
-  }
-
-  return (
-    <section aria-labelledby="verify-heading" className="mt-10">
-      <h2 id="verify-heading" className="font-display text-xl font-semibold">
-        Verify OpenAI access
-      </h2>
-      <p className="mt-1 max-w-prose text-sm text-muted">
-        Sends one tiny embedding request and one tiny chat request using the key in <code>backend/.env</code>. Costs a
-        fraction of a cent.
-      </p>
-      <button
-        type="button"
-        onClick={run}
-        disabled={state.status === "running"}
-        className="mt-4 inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-60"
-      >
-        {state.status === "running" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <ShieldCheck className="size-4" aria-hidden />}
-        {state.status === "running" ? "Checking…" : "Check connection"}
-      </button>
-
-      <div aria-live="polite" className="mt-4">
-        {state.status === "done" && (
-          <ul className="rounded-lg border border-line bg-surface px-4 py-2">
-            <ProbeLine name="Embeddings" probe={state.result.embedding} />
-            <ProbeLine name="Chat" probe={state.result.chat} />
-          </ul>
-        )}
-        {state.status === "error" && (
-          <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
-            {state.message}
-          </p>
-        )}
-      </div>
-    </section>
-  );
-}
-
-export default function Dashboard() {
-  const health = useAsync((signal) => api.health(signal));
-
-  return (
-    <div>
-      <h1 className="font-display text-3xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="mt-2 max-w-prose text-muted">
-        Study activity, quiz scores and review suggestions will appear here as those features are added.
-      </p>
-
-      <section aria-labelledby="status-heading" className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 id="status-heading" className="font-display text-xl font-semibold">
-            System status
-          </h2>
-          <button
-            type="button"
-            onClick={health.reload}
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted hover:bg-surface hover:text-ink"
-          >
-            <RefreshCw className="size-3.5" aria-hidden />
-            Refresh
-          </button>
-        </div>
-
-        <div aria-live="polite" className="mt-3 rounded-lg border border-line bg-surface px-5">
-          {health.status === "loading" && (
-            <p className="flex items-center gap-2 py-4 text-sm text-muted">
-              <Loader2 className="size-4 animate-spin" aria-hidden /> Contacting backend…
-            </p>
-          )}
-
-          {health.status === "error" && (
-            <div role="alert" className="py-4 text-sm">
-              <p className="font-medium text-danger">{health.error.message}</p>
-              <p className="mt-2 text-muted">
-                Start it from the <code>backend</code> folder with{" "}
-                <code>uvicorn app.main:create_app --factory --reload</code>. The frontend expects it at {API_BASE_URL}.
-              </p>
-            </div>
-          )}
-
-          {health.status === "success" && (
-            <dl>
-              <Row label="Backend">
-                <Flag ok yes={`Online (v${health.data.version})`} no="" />
-              </Row>
-              <Row label="OpenAI API key">
-                <Flag ok={health.data.openai_configured} yes="Configured" no="Missing" />
-              </Row>
-              <Row label="Model endpoint">{health.data.openai_base_url}</Row>
-              <Row label="Chat model">{health.data.chat_model}</Row>
-              <Row label="Embedding model">{health.data.embedding_model}</Row>
-              <Row label="Indexed documents">{health.data.indexed_documents}</Row>
-              <Row label="Web search (Tavily)">
-                <Flag ok={health.data.tavily_configured} yes="Configured" no="Not configured" />
-              </Row>
-            </dl>
+      <section className="mt-6" aria-label="Quick actions">
+        <div className="flex flex-wrap gap-2">
+          {empty ? (
+            <Link to="/library"><Button><FileUp className="size-4" aria-hidden /> Upload your first document</Button></Link>
+          ) : (
+            <>
+              <Link to="/chat"><Button><MessageSquareText className="size-4" aria-hidden /> Ask a question</Button></Link>
+              <Link to="/quiz"><Button variant="secondary"><ListChecks className="size-4" aria-hidden /> Generate a quiz</Button></Link>
+              <Link to="/flashcards"><Button variant="secondary"><Layers className="size-4" aria-hidden /> Make flashcards</Button></Link>
+            </>
           )}
         </div>
       </section>
 
-      {health.status === "success" && <OpenAICheck />}
+      <div className="mt-8 grid gap-8 lg:grid-cols-2">
+        <section aria-labelledby="scores-heading">
+          <h2 id="scores-heading" className="font-display text-xl font-semibold">Recent quiz scores</h2>
+          {p.quiz.recent.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">No quizzes taken yet.</p>
+          ) : (
+            <ul className="mt-3 space-y-2.5">
+              {p.quiz.recent.slice(0, 6).map((a) => (
+                <li key={a.attempt_id}>
+                  <div className="flex items-baseline justify-between gap-3 text-sm">
+                    <span className="truncate">{a.quiz_title}</span>
+                    <span className="shrink-0 font-medium">{Math.round(a.score_percent)}%{a.graded_by_model && <span className="ml-1 text-xs font-normal text-muted" title="Includes AI-graded short answers">(AI-graded part)</span>}</span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-line" role="img" aria-label={`${Math.round(a.score_percent)} percent`}>
+                    <div className="h-full bg-accent" style={{ width: `${a.score_percent}%` }} />
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted">{timeAgo(a.submitted_at)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section aria-labelledby="review-heading">
+          <h2 id="review-heading" className="flex items-center gap-2 font-display text-xl font-semibold"><Target className="size-5 text-accent" aria-hidden /> Suggested topics to review</h2>
+          {p.weak_topics.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">{p.weak_topics_note ?? "No weak topics detected from your results so far."}</p>
+          ) : (
+            <ul className="mt-3 space-y-2.5">
+              {p.weak_topics.map((w) => (
+                <li key={w.topic} className="rounded-lg border border-line bg-surface px-3.5 py-3">
+                  <p className="font-medium">{w.topic}</p>
+                  <p className="text-xs text-muted">
+                    {w.incorrect_answers} incorrect answer{w.incorrect_answers === 1 ? "" : "s"}, {w.difficult_cards} difficult card{w.difficult_cards === 1 ? "" : "s"}, out of {plural(w.data_points, "result")}
+                  </p>
+                  {w.documents.length > 0 && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <Link to={`/quiz?topic=${encodeURIComponent(w.topic)}&docs=${w.documents.map((d) => d.document_id).join(",")}`}>
+                        <Button size="sm" variant="secondary">Practice this topic</Button>
+                      </Link>
+                      <span className="text-xs text-muted">in {w.documents.map((d) => d.filename).join(", ")}</span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          <details className="mt-3 text-xs text-muted">
+            <summary className="cursor-pointer">How are these chosen?</summary>
+            <p className="mt-1.5 max-w-prose">{p.weak_topics_method}</p>
+          </details>
+        </section>
+      </div>
+
+      <section className="mt-8" aria-labelledby="activity-heading">
+        <h2 id="activity-heading" className="font-display text-xl font-semibold">Recent activity</h2>
+        {p.recent_activity.length === 0 ? (
+          <p className="mt-2 text-sm text-muted">Nothing yet. Upload a document to get started.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
+            {p.recent_activity.map((a) => (
+              <li key={`${a.type}-${a.ref_id}-${a.at}`}>
+                <Link to={ACTIVITY_LINK[a.type](a.ref_id)} className="flex items-baseline justify-between gap-3 px-4 py-2.5 text-sm hover:bg-paper">
+                  <span className="min-w-0 truncate"><span className="mr-2 text-xs font-medium uppercase tracking-wide text-muted">{ACTIVITY_VERB[a.type]}</span>{a.title}</span>
+                  <span className="shrink-0 text-xs text-muted">{timeAgo(a.at)}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  );
+}
+
+export default function Dashboard() {
+  const progress = useAsync((signal) => api.progress(signal));
+  return (
+    <div>
+      <PageHeader title="Dashboard">
+        <span className="inline-flex items-center gap-2"><BookOpenText className="size-4" aria-hidden /> Your study progress at a glance.</span>
+      </PageHeader>
+
+      {progress.status === "loading" && <Spinner label="Loading your progress…" />}
+      {progress.status === "error" && (
+        <Notice tone="error" title="Couldn’t load your progress">
+          {progress.error.message} Check that the backend is running (<code>uvicorn app.main:create_app --factory --reload</code>).
+        </Notice>
+      )}
+      {progress.status === "success" && <Overview p={progress.data} />}
+
+      <details className="mt-10 rounded-lg border border-line bg-surface px-4 py-3">
+        <summary className="cursor-pointer text-sm font-medium">System status and connection check</summary>
+        <div className="mt-2"><SystemStatus /></div>
+      </details>
     </div>
   );
 }

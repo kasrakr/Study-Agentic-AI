@@ -104,8 +104,11 @@ class AgentNodes:
         return out
 
     @staticmethod
-    def _turn_messages(state: AgentState, answer: str, extras: dict[str, Any]) -> list:
-        return [HumanMessage(content=state["question"]), AIMessage(content=answer, additional_kwargs=extras)]
+    def _turn_messages(state: AgentState, answer: str, extras: dict[str, Any], current_step: str) -> list:
+        # The finishing node is still running, so add its own step to the path recorded so far.
+        path = [e["step"] for e in state.get("execution_events") or []] + [current_step]
+        return [HumanMessage(content=state["question"]),
+                AIMessage(content=answer, additional_kwargs={**extras, "retrieval_path": path})]
 
     # ------------------------------------------------------------ nodes
     @traced("classify_intent")
@@ -129,6 +132,7 @@ class AgentNodes:
         found = retrieve_passages(
             self.d.index, state["retrieval_query"], top_k=self.s.retrieval_top_k,
             document_ids=state.get("selected_document_ids"), min_score=self.s.retrieval_min_score,
+            mode=self.s.retrieval_mode,
         )
         new = [asdict(c) for c in found]
         # On a retry, keep earlier hits so a rewritten query can only add evidence.
@@ -322,7 +326,7 @@ class AgentNodes:
                   "web_search_used": state.get("web_search_used", False)}
         return {
             "final_answer": answer, "answer_sources": dumped, "answer_origin": origin,
-            "limitations": limitations, "messages": self._turn_messages(state, answer, extras),
+            "limitations": limitations, "messages": self._turn_messages(state, answer, extras, "generate_answer"),
             "_detail": detail,
         }
 
@@ -331,7 +335,7 @@ class AgentNodes:
         answer = prompts.SMALLTALK_REPLY
         _writer()({"type": "token", "text": answer})
         return {"final_answer": answer, "answer_origin": "none", "answer_sources": [],
-                "messages": self._turn_messages(state, answer, {"answer_origin": "none"}),
+                "messages": self._turn_messages(state, answer, {"answer_origin": "none"}, "respond_smalltalk"),
                 "_detail": "no document search needed"}
 
     # ------------------------------------------------------------ study tools
@@ -343,17 +347,17 @@ class AgentNodes:
             return list(db.scalars(
                 select(Document.id).where(Document.status == STATUS_INDEXED).order_by(Document.uploaded_at.desc()).limit(10)))
 
-    def _tool_unavailable(self, state: AgentState, what: str) -> dict[str, Any]:
+    def _tool_unavailable(self, state: AgentState, what: str, step: str) -> dict[str, Any]:
         answer = f"I need at least one indexed document to make {what}. Upload study material in the Library first."
         _writer()({"type": "token", "text": answer})
         return {"final_answer": answer, "answer_origin": "none", "answer_sources": [],
-                "messages": self._turn_messages(state, answer, {"answer_origin": "none"}),
+                "messages": self._turn_messages(state, answer, {"answer_origin": "none"}, step),
                 "_detail": "no indexed documents"}
 
-    def _tool_done(self, state: AgentState, answer: str, artifact: dict, detail: str) -> dict[str, Any]:
+    def _tool_done(self, state: AgentState, answer: str, artifact: dict, detail: str, step: str) -> dict[str, Any]:
         _writer()({"type": "token", "text": answer})
         return {"final_answer": answer, "answer_origin": "documents", "answer_sources": [], "artifact": artifact,
-                "messages": self._turn_messages(state, answer, {"answer_origin": "documents", "artifact": artifact}),
+                "messages": self._turn_messages(state, answer, {"answer_origin": "documents", "artifact": artifact}, step),
                 "_detail": detail}
 
     @traced("generate_quiz")
@@ -362,7 +366,7 @@ class AgentNodes:
 
         ids = self._tool_document_ids(state)
         if not ids:
-            return self._tool_unavailable(state, "a quiz")
+            return self._tool_unavailable(state, "a quiz", "generate_quiz")
         topic = state.get("study_tool_topic")
         with self.d.session_factory() as db:
             service = QuizService(db, self.d.index, self.d.chat_model, self.s)
@@ -372,7 +376,7 @@ class AgentNodes:
         about = f" on {topic}" if topic else ""
         answer = (f"I made a {count}-question quiz{about} from your documents. "
                   "Open it on the Quiz page to answer it and see your score.")
-        return self._tool_done(state, answer, {"type": "quiz", "id": quiz.id}, f"{count} questions from {len(ids)} document(s)")
+        return self._tool_done(state, answer, {"type": "quiz", "id": quiz.id}, f"{count} questions from {len(ids)} document(s)", "generate_quiz")
 
     @traced("generate_flashcards")
     def generate_flashcards(self, state: AgentState) -> dict[str, Any]:
@@ -380,7 +384,7 @@ class AgentNodes:
 
         ids = self._tool_document_ids(state)
         if not ids:
-            return self._tool_unavailable(state, "flashcards")
+            return self._tool_unavailable(state, "flashcards", "generate_flashcards")
         topic = state.get("study_tool_topic")
         with self.d.session_factory() as db:
             service = FlashcardService(db, self.d.index, self.d.chat_model, self.s)
@@ -388,4 +392,4 @@ class AgentNodes:
             count = len(service.to_out(deck).cards)
         about = f" on {topic}" if topic else ""
         answer = f"I made {count} flashcards{about} from your documents. Open them on the Flashcards page to review."
-        return self._tool_done(state, answer, {"type": "flashcards", "id": deck.id}, f"{count} cards from {len(ids)} document(s)")
+        return self._tool_done(state, answer, {"type": "flashcards", "id": deck.id}, f"{count} cards from {len(ids)} document(s)", "generate_flashcards")

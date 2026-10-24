@@ -8,6 +8,7 @@ here so they are never hardcoded across modules.
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Literal
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -72,6 +73,8 @@ class Settings(BaseSettings):
     # --- Retrieval ---
     retrieval_top_k: int = Field(6, ge=1, le=30)
     retrieval_min_score: float = Field(0.0, ge=0.0, le=1.0)
+    # vector = embeddings only; hybrid = embeddings + BM25 keyword search fused with reciprocal-rank fusion.
+    retrieval_mode: Literal["vector", "hybrid"] = "vector"
     # Top similarity below this is a "weak retrieval" signal that triggers a query rewrite.
     retrieval_weak_score: float = Field(0.25, ge=0.0, le=1.0)
     max_retrieval_retries: int = Field(1, ge=0, le=2)  # query rewrites per question

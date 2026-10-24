@@ -20,7 +20,7 @@ class Passage:
 
 
 def collect_passages(
-    index: VectorIndex, document_ids: list[str], *, limit: int, topic: str | None = None
+    index: VectorIndex, document_ids: list[str], *, limit: int, topic: str | None = None, mode: str = "vector"
 ) -> list[Passage]:
     """Pick up to `limit` passages from the selected documents.
 
@@ -28,7 +28,7 @@ def collect_passages(
     whole of the selected material (not just the start of the first document).
     """
     if topic and topic.strip():
-        found = retrieve_passages(index, topic.strip(), top_k=limit, document_ids=document_ids)
+        found = retrieve_passages(index, topic.strip(), top_k=limit, document_ids=document_ids, mode=mode)  # type: ignore[arg-type]
         rows = [(c.text, {"document_id": c.document_id, "filename": c.filename,
                           "page_number": c.page_number, "chunk_id": c.chunk_id}) for c in found]
     else:

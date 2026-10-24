@@ -1,0 +1,22 @@
+# Optional convenience. The normal way to run the app is the two commands in README.md.
+#   1. cp backend/.env.example backend/.env   (set OPENAI_API_KEY, optionally TAVILY_API_KEY)
+#   2. docker compose up --build
+# Open http://localhost:5173. Your documents, index and chats persist in ./storage.
+services:
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    env_file: backend/.env
+    environment:
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+    ports: ["8000:8000"]
+    volumes: ["./storage:/srv/storage"]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args: { VITE_API_BASE_URL: "http://localhost:8000" }
+    ports: ["5173:80"]
+    depends_on: [backend]
+    restart: unless-stopped

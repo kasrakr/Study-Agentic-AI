@@ -43,3 +43,19 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Styles for rendered Markdown answers */
+.prose-answer { line-height: 1.65; overflow-wrap: anywhere; }
+.prose-answer > * + * { margin-top: 0.75rem; }
+.prose-answer h1, .prose-answer h2, .prose-answer h3 { font-family: var(--font-display); font-weight: 600; margin-top: 1.1rem; }
+.prose-answer h1 { font-size: 1.25rem; } .prose-answer h2 { font-size: 1.15rem; } .prose-answer h3 { font-size: 1.05rem; }
+.prose-answer ul { list-style: disc; padding-left: 1.4rem; }
+.prose-answer ol { list-style: decimal; padding-left: 1.4rem; }
+.prose-answer li + li { margin-top: 0.25rem; }
+.prose-answer code { background: var(--color-paper); border-radius: 4px; padding: 0.1rem 0.3rem; font-size: 0.875em; }
+.prose-answer pre { background: var(--color-paper); border-radius: 8px; padding: 0.75rem; overflow-x: auto; }
+.prose-answer pre code { background: none; padding: 0; }
+.prose-answer blockquote { border-left: 3px solid var(--color-line); padding-left: 0.75rem; color: var(--color-muted); }
+.prose-answer table { border-collapse: collapse; font-size: 0.9rem; }
+.prose-answer th, .prose-answer td { border: 1px solid var(--color-line); padding: 0.35rem 0.6rem; text-align: left; }
+.prose-answer th { background: var(--color-paper); }

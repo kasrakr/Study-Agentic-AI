@@ -119,6 +119,7 @@ export interface StoredMessage {
   retrieval_path: string[];
   web_search_used: boolean;
   limitations: string | null;
+  artifact: Artifact | null;
 }
 
 export interface ConversationDetail {
@@ -256,4 +257,55 @@ export interface Deck {
   document_ids: string[];
   created_at: string;
   cards: Flashcard[];
+}
+
+// ---- Progress ----
+export interface RecentAttempt {
+  attempt_id: string;
+  quiz_id: string;
+  quiz_title: string;
+  score_percent: number;
+  points: number;
+  max_points: number;
+  graded_by_model: boolean;
+  submitted_at: string;
+}
+
+export interface WeakTopic {
+  topic: string;
+  data_points: number;
+  incorrect_answers: number;
+  difficult_cards: number;
+  weak_share: number;
+  documents: { document_id: string; filename: string }[];
+}
+
+export interface Suggestion {
+  kind: "practice_quiz";
+  topic: string;
+  document_ids: string[];
+  reason: string;
+}
+
+export interface ActivityItem {
+  type: "upload" | "chat" | "quiz" | "flashcards";
+  title: string;
+  at: string;
+  ref_id: string;
+}
+
+export interface Progress {
+  indexed_documents: number;
+  quiz: {
+    attempts: number;
+    average_score_percent: number | null;
+    best_score_percent: number | null;
+    recent: RecentAttempt[];
+  };
+  flashcards: { decks: number; rated: number; easy: number; medium: number; difficult: number };
+  weak_topics: WeakTopic[];
+  weak_topics_method: string;
+  weak_topics_note: string | null;
+  suggestions: Suggestion[];
+  recent_activity: ActivityItem[];
 }

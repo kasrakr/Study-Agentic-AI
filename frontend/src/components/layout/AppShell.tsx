@@ -1,4 +1,4 @@
-import { BookOpenText, LayoutDashboard, type LucideIcon } from "lucide-react";
+import { BookOpenText, Layers, LayoutDashboard, Library, ListChecks, MessageSquareText, type LucideIcon } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -8,8 +8,13 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-// Only pages that exist are listed. Later phases add Library, Study chat, Quiz, Flashcards.
-const NAV_ITEMS: NavItem[] = [{ to: "/", label: "Dashboard", icon: LayoutDashboard }];
+const NAV_ITEMS: NavItem[] = [
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/chat", label: "Study chat", icon: MessageSquareText },
+  { to: "/library", label: "Library", icon: Library },
+  { to: "/quiz", label: "Quiz", icon: ListChecks },
+  { to: "/flashcards", label: "Flashcards", icon: Layers },
+];
 
 function Brand() {
   return (
@@ -32,7 +37,7 @@ function Nav({ className }: { className?: string }) {
           end
           className={({ isActive }) =>
             cn(
-              "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex shrink-0 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               isActive ? "bg-accent-soft text-accent" : "text-muted hover:bg-paper hover:text-ink",
             )
           }
@@ -50,7 +55,7 @@ export default function AppShell() {
     <div className="flex min-h-full flex-col md:flex-row">
       <header className="border-b border-line bg-surface px-4 py-3 md:hidden">
         <Brand />
-        <Nav className="mt-3 overflow-x-auto" />
+        <Nav className="mt-3 overflow-x-auto pb-1" />
       </header>
 
       <aside className="hidden w-60 shrink-0 flex-col gap-8 border-r border-line bg-surface px-4 py-6 md:flex">
@@ -61,8 +66,8 @@ export default function AppShell() {
         </p>
       </aside>
 
-      <main className="min-w-0 flex-1 px-5 py-8 md:px-10 md:py-10">
-        <div className="mx-auto max-w-3xl">
+      <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto max-w-4xl">
           <Outlet />
         </div>
       </main>

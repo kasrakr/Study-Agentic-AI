@@ -22,7 +22,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import __version__
 from app.agent.graph import build_graph
 from app.agent.nodes import AgentDeps
-from app.api import chat, documents, flashcards, health, quizzes
+from app.api import chat, documents, flashcards, health, progress, quizzes
 from app.config import Settings, get_settings
 from app.db.database import create_db_engine, init_db, make_session_factory
 from app.errors import AppError
@@ -155,4 +155,5 @@ def create_app(
     app.include_router(chat.conversations)
     app.include_router(quizzes.router)
     app.include_router(flashcards.router)
+    app.include_router(progress.router)
     return app

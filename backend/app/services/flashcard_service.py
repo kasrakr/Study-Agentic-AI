@@ -36,7 +36,8 @@ class FlashcardService:
         if card_count > self.settings.flashcard_max_cards:
             raise AppError(f"At most {self.settings.flashcard_max_cards} cards can be generated at once.",
                            status_code=422, code="too_many_cards")
-        passages = collect_passages(self.index, document_ids, limit=self.settings.generation_context_chunks, topic=topic)
+        passages = collect_passages(self.index, document_ids, limit=self.settings.generation_context_chunks, topic=topic,
+                                    mode=self.settings.retrieval_mode)
         passage_text = prompts.format_quiz_passages(passages)
 
         accepted: list[tuple] = []

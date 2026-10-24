@@ -13,6 +13,7 @@ import type {
   Flashcard,
   HealthStatus,
   OpenAIHealth,
+  Progress,
   Quiz,
   QuizAnswer,
   QuizGenerateRequest,
@@ -140,6 +141,8 @@ export const api = {
     return request<UploadResponse>("/api/documents/upload", { method: "POST", body: form, signal });
   },
 
+  progress: (signal?: AbortSignal) => request<Progress>("/api/progress", { signal }),
+
   documentFileUrl: (id: string, page?: number | null) =>
     `${API_BASE_URL}/api/documents/${encodeURIComponent(id)}/file${page ? `#page=${page}` : ""}`,
 
@@ -163,3 +166,32 @@ export const api = {
   rateCard: (cardId: string, difficulty: CardDifficulty) =>
     request<Flashcard>(`/api/flashcards/cards/${encodeURIComponent(cardId)}/difficulty`, json({ difficulty }, undefined, "PUT")),
 };
+
+/**
+ * Upload a file with real upload progress (fetch cannot report it). `onProgress` receives 0..1 while the file
+ * is being sent; indexing then happens on the server before the promise resolves.
+ */
+export function uploadWithProgress(
+  file: File,
+  onProgress: (fraction: number) => void,
+  signal?: AbortSignal,
+): Promise<UploadResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE_URL}/api/documents/upload`);
+    xhr.responseType = "json";
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
+    xhr.onload = () => {
+      const body = xhr.response as (UploadResponse & { error?: ApiErrorBody }) | null;
+      if (xhr.status >= 200 && xhr.status < 300 && body) return resolve(body);
+      const error = body?.error;
+      reject(new ApiError(error?.message ?? `Upload failed (${xhr.status}).`, xhr.status, error?.code ?? "http_error", error?.details ?? {}));
+    };
+    xhr.onerror = () => reject(new ApiError(`Cannot reach the backend at ${API_BASE_URL}. Is it running?`, 0, "network_error"));
+    xhr.onabort = () => reject(new DOMException("Upload cancelled", "AbortError"));
+    signal?.addEventListener("abort", () => xhr.abort());
+    const form = new FormData();
+    form.append("file", file);
+    xhr.send(form);
+  });
+}
