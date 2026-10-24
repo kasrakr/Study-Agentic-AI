@@ -86,7 +86,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
           <p className="px-1 text-xs leading-relaxed text-faint">
             Your files stay on this machine; questions and document text are sent to OpenAI.
             <br />
-            Made by Kasra Karimian
+            <span className="text-gradient">Made by Kasra Karimian</span>
           </p>
         )}
         <button

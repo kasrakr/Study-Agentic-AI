@@ -140,9 +140,8 @@ export default function Dashboard() {
             <BookOpenText className="size-4 shrink-0 text-accent" aria-hidden /> Your study progress at a glance.
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <img src="/kasra-logo.png" alt="" className="h-11 w-16 object-contain" />
-          <span className="text-gradient text-3xl font-semibold tracking-tight sm:text-[2.1rem]">Kasra Karimian</span>
+        <div className="flex shrink-0 flex-col items-end gap-0.5">
+          <img src="/kasra-logo.png" alt="" className="h-9 w-12 object-contain" />
         </div>
       </header>
 
