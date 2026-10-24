@@ -6,6 +6,7 @@ API responses. The temporary stores are deleted afterwards, so your real library
 
 from __future__ import annotations
 
+import gc
 import logging
 import tempfile
 import time
@@ -75,7 +76,10 @@ def run_evaluation(
     compare_retrieval: bool = False,
     on_progress: Any = None,
 ) -> dict[str, Any]:
-    with tempfile.TemporaryDirectory(prefix="study-eval-") as tmp:
+    # ignore_cleanup_errors: on Windows, ChromaDB can keep its index files open for a moment after the run, which
+    # made deleting the temp folder raise PermissionError (WinError 32) and lose the finished report. A leftover
+    # temp folder is harmless; a lost report is not.
+    with tempfile.TemporaryDirectory(prefix="study-eval-", ignore_cleanup_errors=True) as tmp:
         root = Path(tmp)
         isolated = settings.model_copy(update={
             "database_url": f"sqlite:///{root / 'eval.db'}",
@@ -113,6 +117,8 @@ def run_evaluation(
                     row.update(_answer(client, chat_service, recorder, index, judge_model, isolated, q, judge))
                 results.append(row)
 
+        _release_chroma(app)
+
         return {
             "config": {"chat_model": isolated.openai_chat_model, "embedding_model": isolated.openai_embedding_model,
                        "endpoint": isolated.openai_base_url, "retrieval_mode": isolated.retrieval_mode,
@@ -122,6 +128,18 @@ def run_evaluation(
             "retrieval_comparison": metrics.compare_modes(comparison) if compare_retrieval else None,
             "questions": results,
         }
+
+
+def _release_chroma(app: Any) -> None:
+    """Best effort: drop ChromaDB's handles on the temp index so the folder can be deleted on Windows."""
+    try:
+        app.state.vector_index._store = None
+        from chromadb.api.shared_system_client import SharedSystemClient
+
+        SharedSystemClient.clear_system_cache()
+    except Exception:  # noqa: BLE001 - cleanup only; never let it break a finished evaluation
+        logger.debug("Could not release the temporary Chroma client", exc_info=True)
+    gc.collect()
 
 
 def _ingest(client: TestClient, documents_dir: Path) -> dict[str, str]:
