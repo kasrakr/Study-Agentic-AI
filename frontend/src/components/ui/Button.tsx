@@ -11,7 +11,7 @@ const button = cva(
         primary: "bg-brand-gradient text-white shadow-glow hover:brightness-110",
         secondary: "glass text-ink hover:border-line-strong hover:bg-surface-strong",
         ghost: "text-muted hover:bg-hover hover:text-ink",
-        danger: "bg-danger/90 text-[#1a0a0a] hover:bg-danger",
+        danger: "bg-danger/90 text-on-danger hover:bg-danger",
       },
       size: { sm: "px-3 py-1.5 text-sm", md: "px-4 py-2 text-sm" },
     },

@@ -2,7 +2,9 @@ import { ChevronsLeft, ChevronsRight, Layers, LayoutDashboard, Library, ListChec
 import { useCallback, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { LogoMark } from "@/components/ui/Logo";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { ToastProvider } from "@/components/ui/Toast";
+import { useTheme, type Theme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -43,7 +45,7 @@ function Brand({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+function Sidebar({ collapsed, onToggle, theme, onToggleTheme }: { collapsed: boolean; onToggle: () => void; theme: Theme; onToggleTheme: () => void }) {
   return (
     <aside
       className={cn(
@@ -89,6 +91,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
             <span className="text-gradient">Made by Kasra Karimian</span>
           </p>
         )}
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} variant={collapsed ? "icon" : "full"} />
         <button
           type="button" onClick={onToggle} aria-pressed={collapsed} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           data-tip={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -102,7 +105,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   );
 }
 
-function MobileNav() {
+function MobileNav({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   return (
     <nav aria-label="Mobile navigation" className="glass-strong z-30 flex shrink-0 rounded-none border-x-0 border-b-0 px-1 pb-[env(safe-area-inset-bottom)] md:hidden">
       {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
@@ -119,12 +122,14 @@ function MobileNav() {
           <span className="max-w-full truncate">{label}</span>
         </NavLink>
       ))}
+      <ThemeToggle theme={theme} onToggle={onToggleTheme} variant="tab" />
     </nav>
   );
 }
 
 export default function AppShell() {
   const [collapsed, setCollapsed] = useStoredFlag(COLLAPSE_KEY, false);
+  const { theme, toggle: toggleTheme } = useTheme();
   const { pathname } = useLocation();
   const fullBleed = pathname === "/chat"; // the chat manages its own scrolling so the composer stays anchored
 
@@ -134,7 +139,7 @@ export default function AppShell() {
         <a href="#main" className="sr-only z-[70] rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3">
           Skip to main content
         </a>
-        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+        <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} theme={theme} onToggleTheme={toggleTheme} />
 
         <main id="main" tabIndex={-1} className={cn("relative min-h-0 min-w-0 flex-1 outline-none", fullBleed ? "flex flex-col overflow-hidden" : "overflow-y-auto")}>
           {fullBleed ? (
@@ -146,7 +151,7 @@ export default function AppShell() {
           )}
         </main>
 
-        <MobileNav />
+        <MobileNav theme={theme} onToggleTheme={toggleTheme} />
       </div>
     </ToastProvider>
   );

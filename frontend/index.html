@@ -8,6 +8,20 @@
     <meta name="description" content="Ask questions about your own study materials, with answers grounded in your documents." />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232563eb%22/><path d=%22M16 5c.7 6 3.9 9.3 10 10-6.1.7-9.3 4-10 10-.7-6-3.9-9.3-10-10 6.1-.7 9.3-4 10-10Z%22 fill=%22white%22/></svg>" />
     <title>Study Agent</title>
+    <script>
+      // Apply the saved/OS theme before first paint so there is no dark flash for light-mode users.
+      (function () {
+        try {
+          var t = localStorage.getItem("study-agent:theme");
+          if (t !== "light" && t !== "dark") t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", t);
+          if (t === "light") {
+            document.querySelector('meta[name="color-scheme"]').setAttribute("content", "light");
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f7fb");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

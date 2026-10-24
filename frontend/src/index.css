@@ -51,6 +51,7 @@
   --color-warn-soft: rgb(251 191 36 / 0.12);
   --color-danger: #f87171;
   --color-danger-soft: rgb(248 113 113 / 0.12);
+  --color-on-danger: #1a0a0a;
 
   --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 16px 40px -18px rgb(2 6 23 / 0.7);
   --shadow-lift: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 22px 44px -20px rgb(2 6 23 / 0.85), 0 0 0 1px rgb(96 165 250 / 0.12);
@@ -71,6 +72,90 @@
   @keyframes flash { 0% { box-shadow: 0 0 0 0 rgb(96 165 250 / 0.55); } 100% { box-shadow: 0 0 0 10px rgb(96 165 250 / 0); } }
 }
 
+/*
+ * Theme helpers + light theme
+ * ---------------------------
+ * Dark is the default. The light theme is switched on with <html data-theme="light"> (set by useTheme / the inline
+ * script in index.html) and only overrides tokens, so components never need to know which theme is active.
+ */
+:root {
+  --glass-solid: #0e1628;
+  --glass-strong-solid: #131e35;
+  --tip-bg: #16223b;
+  --body-ink: #e2e8f0;
+  --code-ink: #bae6fd;
+  --code-bg: rgb(96 165 250 / 0.12);
+  --code-border: rgb(96 165 250 / 0.16);
+  --block-bg: rgb(4 7 16 / 0.7);
+  --block-ink: #dbeafe;
+  --gradient-text: linear-gradient(120deg, #f1f5f9 20%, #93c5fd 60%, #67e8f9 100%);
+  --scroll-thumb: rgb(148 163 184 / 0.3);
+  --ambient-1: rgb(37 99 235 / 0.2);
+  --ambient-2: rgb(34 211 238 / 0.07);
+  --ambient-3: rgb(129 140 248 / 0.1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-paper: #f4f7fb;
+  --color-paper-2: #e9eef6;
+  --color-elevated: #ffffff;
+  --color-inset: rgb(255 255 255 / 0.85);
+  --color-hover: rgb(15 23 42 / 0.06);
+
+  --color-surface: rgb(255 255 255 / 0.72);
+  --color-surface-strong: rgb(255 255 255 / 0.92);
+  --color-line: rgb(15 23 42 / 0.11);
+  --color-line-strong: rgb(15 23 42 / 0.22);
+
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-faint: #64748b;
+
+  --color-brand: #2563eb;
+  --color-accent: #1d4ed8;
+  --color-accent-soft: rgb(37 99 235 / 0.1);
+  --color-cyan: #0891b2;
+  --color-violet: #4f46e5;
+
+  --color-web: #4338ca;
+  --color-web-soft: rgb(79 70 229 / 0.1);
+  --color-web-solid: #4f46e5;
+
+  --color-ok: #047857;
+  --color-ok-soft: rgb(5 150 105 / 0.12);
+  --color-warn: #b45309;
+  --color-warn-soft: rgb(217 119 6 / 0.13);
+  --color-danger: #dc2626;
+  --color-danger-soft: rgb(220 38 38 / 0.1);
+  --color-on-danger: #ffffff;
+
+  --shadow-glass: 0 1px 2px rgb(15 23 42 / 0.05), 0 12px 32px -16px rgb(15 23 42 / 0.16);
+  --shadow-lift: 0 1px 2px rgb(15 23 42 / 0.06), 0 18px 40px -18px rgb(15 23 42 / 0.28), 0 0 0 1px rgb(37 99 235 / 0.14);
+  --shadow-glow: 0 10px 26px -10px rgb(37 99 235 / 0.5);
+
+  --glass-solid: #ffffff;
+  --glass-strong-solid: #ffffff;
+  --tip-bg: #0f172a;
+  --body-ink: #1e293b;
+  --code-ink: #0369a1;
+  --code-bg: rgb(37 99 235 / 0.08);
+  --code-border: rgb(37 99 235 / 0.16);
+  --block-bg: #f1f5f9;
+  --block-ink: #1e293b;
+  --gradient-text: linear-gradient(120deg, #0f172a 15%, #1d4ed8 60%, #0891b2 100%);
+  --scroll-thumb: rgb(71 85 105 / 0.35);
+  --ambient-1: rgb(37 99 235 / 0.1);
+  --ambient-2: rgb(34 211 238 / 0.08);
+  --ambient-3: rgb(129 140 248 / 0.1);
+}
+
+/* Smooth cross-fade when the user flips the theme (class is added/removed briefly by useTheme) */
+.theme-transition, .theme-transition *, .theme-transition *::before, .theme-transition *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
+}
+
 html,
 body,
 #root {
@@ -81,7 +166,7 @@ html {
   color-scheme: dark;
   background: var(--color-paper);
   scrollbar-width: thin;
-  scrollbar-color: rgb(148 163 184 / 0.35) transparent;
+  scrollbar-color: var(--scroll-thumb) transparent;
 }
 
 body {
@@ -96,9 +181,9 @@ body {
 
 h1, h2, h3, h4 { letter-spacing: -0.015em; }
 code, kbd, pre, samp { font-family: var(--font-mono); }
-:not(pre) > code { background: rgb(96 165 250 / 0.12); border: 1px solid rgb(96 165 250 / 0.16); border-radius: 6px; padding: 0.08rem 0.35rem; font-size: 0.85em; color: #bae6fd; overflow-wrap: anywhere; }
+:not(pre) > code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 6px; padding: 0.08rem 0.35rem; font-size: 0.85em; color: var(--code-ink); overflow-wrap: anywhere; }
 
-::selection { background: rgb(59 130 246 / 0.4); color: #fff; }
+::selection { background: rgb(59 130 246 / 0.35); color: var(--color-ink); }
 
 :focus-visible {
   outline: 2px solid var(--color-accent);
@@ -107,11 +192,11 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
 }
 
 /* Scrollbars that stay usable: thin, but with a wide enough hit area */
-* { scrollbar-width: thin; scrollbar-color: rgb(148 163 184 / 0.3) transparent; }
+* { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgb(148 163 184 / 0.28); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
-::-webkit-scrollbar-thumb:hover { background: rgb(148 163 184 / 0.5); background-clip: content-box; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-faint); background-clip: content-box; border: 2px solid transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -128,12 +213,12 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
    * navy surface so text always stays readable.
    */
   .glass {
-    background: #0e1628;
+    background: var(--glass-solid);
     border: 1px solid var(--color-line);
     box-shadow: var(--shadow-glass);
   }
   .glass-strong {
-    background: #131e35;
+    background: var(--glass-strong-solid);
     border: 1px solid var(--color-line-strong);
     box-shadow: var(--shadow-glass);
   }
@@ -170,7 +255,7 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
     background-image: linear-gradient(135deg, rgb(59 130 246 / 0.18), rgb(34 211 238 / 0.06));
   }
   .text-gradient {
-    background-image: linear-gradient(120deg, #f1f5f9 20%, #93c5fd 60%, #67e8f9 100%);
+    background-image: var(--gradient-text);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -204,9 +289,9 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
     font-size: 0.72rem;
     font-weight: 500;
     color: var(--color-ink);
-    background: #16223b;
+    background: var(--tip-bg);
     border: 1px solid var(--color-line-strong);
-    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.6);
+    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.4);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.14s ease, translate 0.14s ease;
@@ -222,9 +307,9 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
   /* Soft ambient lighting behind the whole app (static, no animation) */
   .ambient {
     background:
-      radial-gradient(60rem 38rem at 12% -12%, rgb(37 99 235 / 0.2), transparent 62%),
-      radial-gradient(46rem 32rem at 96% 6%, rgb(34 211 238 / 0.07), transparent 60%),
-      radial-gradient(42rem 28rem at 55% 112%, rgb(129 140 248 / 0.1), transparent 60%),
+      radial-gradient(60rem 38rem at 12% -12%, var(--ambient-1), transparent 62%),
+      radial-gradient(46rem 32rem at 96% 6%, var(--ambient-2), transparent 60%),
+      radial-gradient(42rem 28rem at 55% 112%, var(--ambient-3), transparent 60%),
       linear-gradient(180deg, var(--color-paper), var(--color-paper-2));
   }
 
@@ -244,7 +329,7 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
 }
 
 /* Styles for rendered Markdown answers */
-.prose-answer { font-size: 0.95rem; line-height: 1.75; color: #e2e8f0; overflow-wrap: anywhere; }
+.prose-answer { font-size: 0.95rem; line-height: 1.75; color: var(--body-ink); overflow-wrap: anywhere; }
 .prose-answer > * + * { margin-top: 0.85rem; }
 .prose-answer strong { color: var(--color-ink); font-weight: 600; }
 .prose-answer h1, .prose-answer h2, .prose-answer h3, .prose-answer h4 { font-weight: 600; color: var(--color-ink); margin-top: 1.4rem; line-height: 1.35; letter-spacing: -0.015em; }
@@ -259,9 +344,9 @@ code, kbd, pre, samp { font-family: var(--font-mono); }
 .prose-answer table { border-collapse: collapse; font-size: 0.875rem; width: 100%; }
 .prose-answer th, .prose-answer td { border-bottom: 1px solid var(--color-line); padding: 0.5rem 0.8rem; text-align: left; vertical-align: top; }
 .prose-answer tr:last-child td { border-bottom: 0; }
-.prose-answer th { background: rgb(148 163 184 / 0.08); font-weight: 600; color: var(--color-ink); white-space: nowrap; }
-.prose-answer tbody tr:nth-child(even) td { background: rgb(148 163 184 / 0.035); }
+.prose-answer th { background: var(--color-hover); font-weight: 600; color: var(--color-ink); white-space: nowrap; }
+.prose-answer tbody tr:nth-child(even) td { background: var(--color-hover); }
 
-.code-block { border: 1px solid var(--color-line); border-radius: 0.75rem; background: rgb(4 7 16 / 0.7); overflow: hidden; }
-.code-block pre { margin: 0; padding: 0.85rem 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.65; color: #dbeafe; background: transparent; }
+.code-block { border: 1px solid var(--color-line); border-radius: 0.75rem; background: var(--block-bg); overflow: hidden; }
+.code-block pre { margin: 0; padding: 0.85rem 1rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.65; color: var(--block-ink); background: transparent; }
 .code-block pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
