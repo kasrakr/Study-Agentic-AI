@@ -37,7 +37,9 @@ export default function ChatEmptyState({ indexedCount, loading, onPick }: {
   return (
     <div className="mx-auto flex min-h-full max-w-2xl flex-col justify-center px-1 py-8 text-center animate-fade-up">
       <Orb />
-      <h2 className="text-gradient mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">What are you studying today?</h2>
+    <h2 className="text-gradient mt-6 mb-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+      What are you studying today?
+    </h2>
       <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted sm:text-base">
         Ask questions about your notes, get step-by-step explanations with cited pages, and turn your material into quizzes and flashcards.
       </p>
