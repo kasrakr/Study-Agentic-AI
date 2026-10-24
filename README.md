@@ -210,14 +210,6 @@ Documents are split **page by page** so every citation keeps an exact page numbe
 
 </div>
 
-### 7. Demo (optional)
-
-<div align="center">
-
-<!-- 🎬 IMAGE SLOT 8 — Short GIF: upload a PDF → ask a question → watch the timeline + citations appear -->
-<img src="docs/images/demo.gif" alt="Demo" width="900" />
-
-</div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
