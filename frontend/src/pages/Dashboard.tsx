@@ -141,7 +141,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5">
-          <img src="/kasra-logo.png" alt="" className="h-9 w-12 object-contain" />
+          
         </div>
       </header>
 
