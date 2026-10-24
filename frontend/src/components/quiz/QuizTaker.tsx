@@ -29,7 +29,7 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(toAnswers(quiz, drafts)); }} className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-display text-xl font-semibold">{quiz.title}</h2>
+        <h2 className="text-xl font-semibold">{quiz.title}</h2>
         <p className="text-sm text-muted" aria-live="polite">{answered} of {quiz.question_count} answered · {quiz.difficulty}</p>
       </div>
 
@@ -37,20 +37,20 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
         {quiz.questions.map((q) => {
           const d = drafts[q.id];
           return (
-            <li key={q.id} className="rounded-lg border border-line bg-surface p-4">
+            <li key={q.id} className="glass rounded-2xl p-4">
               <fieldset>
                 <legend className="font-medium"><span className="mr-2 text-muted">{q.position}.</span>{q.question}</legend>
                 <p className="mt-0.5 text-xs text-muted">{q.topic}</p>
                 <div className="mt-3 space-y-2">
                   {q.type === "multiple_choice" && q.options.map((opt, i) => (
-                    <label key={i} className={cn("flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2 text-sm", d?.selected === i ? "border-accent bg-accent-soft" : "border-line hover:bg-paper")}>
-                      <input type="radio" name={q.id} checked={d?.selected === i} onChange={() => set(q.id, { selected: i })} className="mt-0.5 accent-[var(--color-accent)]" />
+                    <label key={i} className={cn("flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition-colors", d?.selected === i ? "border-accent bg-accent-soft" : "border-line hover:bg-hover")}>
+                      <input type="radio" name={q.id} checked={d?.selected === i} onChange={() => set(q.id, { selected: i })} className="mt-0.5 accent-[var(--color-brand)]" />
                       {opt}
                     </label>
                   ))}
                   {q.type === "true_false" && [true, false].map((v) => (
-                    <label key={String(v)} className={cn("flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm", d?.bool === v ? "border-accent bg-accent-soft" : "border-line hover:bg-paper")}>
-                      <input type="radio" name={q.id} checked={d?.bool === v} onChange={() => set(q.id, { bool: v })} className="accent-[var(--color-accent)]" />
+                    <label key={String(v)} className={cn("flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition-colors", d?.bool === v ? "border-accent bg-accent-soft" : "border-line hover:bg-hover")}>
+                      <input type="radio" name={q.id} checked={d?.bool === v} onChange={() => set(q.id, { bool: v })} className="accent-[var(--color-brand)]" />
                       {v ? "True" : "False"}
                     </label>
                   ))}
@@ -58,7 +58,7 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
                     <>
                       <label htmlFor={`a-${q.id}`} className="sr-only">Your answer to question {q.position}</label>
                       <textarea id={`a-${q.id}`} rows={3} maxLength={4000} value={d?.text ?? ""} onChange={(e) => set(q.id, { text: e.target.value })}
-                                placeholder="Write your answer in a sentence or two…" className="w-full rounded-md border border-line px-3 py-2 text-sm" />
+                                placeholder="Write your answer in a sentence or two…" className="w-full field text-sm" />
                     </>
                   )}
                 </div>

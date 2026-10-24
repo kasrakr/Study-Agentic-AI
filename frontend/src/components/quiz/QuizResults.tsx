@@ -17,9 +17,9 @@ export default function QuizResults({ result, onRetry, onNew }: { result: Attemp
   const percent = Math.round(result.score_percent);
   return (
     <div className="space-y-5">
-      <section className="rounded-lg border border-line bg-surface p-5" aria-labelledby="score-heading">
+      <section className="glass rounded-2xl p-5" aria-labelledby="score-heading">
         <h2 id="score-heading" className="text-sm font-medium text-muted">Your score</h2>
-        <p className="mt-1 font-display text-4xl font-semibold">{percent}%</p>
+        <p className="mt-1 text-4xl font-semibold">{percent}%</p>
         <p className="text-sm text-muted">{result.points} of {result.max_points} points</p>
         {result.grading_note && <Notice tone="info" className="mt-3"><span className="inline-flex items-center gap-1.5"><Bot className="size-4" aria-hidden />{result.grading_note}</span></Notice>}
         <div className="mt-4 flex flex-wrap gap-2">
@@ -30,7 +30,7 @@ export default function QuizResults({ result, onRetry, onNew }: { result: Attemp
 
       <ol className="space-y-3">
         {result.results.map((r) => (
-          <li key={r.question_id} className={cn("rounded-lg border bg-surface p-4", r.is_correct ? "border-emerald-200" : r.is_correct === false ? "border-red-200" : "border-line")}>
+          <li key={r.question_id} className={cn("glass rounded-2xl p-4", r.is_correct ? "border-ok/40" : r.is_correct === false ? "border-danger/40" : "")}>
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <Verdict r={r} />
               <span className="flex items-center gap-2 text-xs text-muted">
@@ -43,7 +43,7 @@ export default function QuizResults({ result, onRetry, onNew }: { result: Attemp
               <div className="flex gap-2"><dt className="shrink-0 text-muted">Your answer:</dt><dd>{r.your_answer ?? <em className="text-muted">none</em>}</dd></div>
               {!r.is_correct && <div className="flex gap-2"><dt className="shrink-0 text-muted">{r.type === "short_answer" ? "Model answer:" : "Correct answer:"}</dt><dd className="font-medium">{r.correct_answer}</dd></div>}
             </dl>
-            {r.feedback && <p className="mt-2 rounded-md bg-accent-soft px-3 py-2 text-sm"><span className="font-medium">Feedback:</span> {r.feedback}</p>}
+            {r.feedback && <p className="mt-2 rounded-xl border border-accent/20 bg-accent-soft px-3 py-2 text-sm"><span className="font-medium">Feedback:</span> {r.feedback}</p>}
             <p className="mt-2 text-sm text-ink/80">{r.explanation}</p>
             <p className="mt-2 text-xs text-muted">
               Source:{" "}

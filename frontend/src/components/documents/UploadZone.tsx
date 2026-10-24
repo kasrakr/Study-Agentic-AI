@@ -1,5 +1,6 @@
 import { CheckCircle2, CircleAlert, CopyCheck, Loader2, UploadCloud } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
+import { useToast } from "@/components/ui/Toast";
 import { uploadWithProgress } from "@/lib/api";
 import { errorMessage, formatBytes } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
   const [items, setItems] = useState<Item[]>([]);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   const patch = (id: number, change: Partial<Item>) =>
     setItems((list) => list.map((i) => (i.id === id ? { ...i, ...change } : i)));
@@ -34,6 +36,7 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
       const item = queued[n];
       if (!EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext))) {
         patch(item.id, { phase: "error", message: "Unsupported file type. Upload a PDF, TXT or Markdown file." });
+        toast.push(`${file.name}: unsupported file type.`, "error");
         continue;
       }
       try {
@@ -43,9 +46,11 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
         patch(item.id, result.duplicate
           ? { phase: "duplicate", progress: 1, message: "This exact file is already in your library." }
           : { phase: "done", progress: 1 });
+        toast.push(result.duplicate ? `${file.name} is already in your library.` : `${file.name} is ready to use.`, result.duplicate ? "info" : "success");
         onUploaded();
       } catch (err) {
         patch(item.id, { phase: "error", message: errorMessage(err) });
+        toast.push(`${file.name} couldn’t be processed.`, "error");
         onUploaded(); // a failed document is still listed, with its reason
       }
     }
@@ -61,19 +66,25 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
     <section aria-label="Upload documents">
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
+        onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
         onDrop={onDrop}
         className={cn(
-          "flex flex-col items-center gap-2 rounded-lg border-2 border-dashed bg-surface px-6 py-8 text-center transition-colors",
-          dragging ? "border-accent bg-accent-soft" : "border-line",
+          "flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-all duration-200",
+          dragging ? "border-accent bg-accent-soft shadow-[0_0_0_6px_rgb(59_130_246/0.12)]" : "glass border-line-strong hover:border-accent/50",
         )}
       >
-        <UploadCloud className="size-8 text-muted" aria-hidden />
+        <span className={cn("grid size-12 place-items-center rounded-2xl bg-tint ring-1 ring-inset ring-accent/25 transition-transform duration-200", dragging && "scale-110")}>
+          <UploadCloud className="size-6 text-accent" aria-hidden />
+        </span>
         <p className="text-sm">
-          Drop files here or{" "}
-          <button type="button" className="font-medium text-accent underline underline-offset-2" onClick={() => inputRef.current?.click()}>
-            choose files
-          </button>
+          {dragging ? "Release to upload" : (
+            <>
+              Drop files here or{" "}
+              <button type="button" className="font-medium text-accent underline underline-offset-2 transition-colors hover:text-ink" onClick={() => inputRef.current?.click()}>
+                choose files
+              </button>
+            </>
+          )}
         </p>
         <p className="text-xs text-muted">PDF, TXT or Markdown. Scanned PDFs without a text layer can’t be read.</p>
         <input
@@ -85,8 +96,8 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
       {items.length > 0 && (
         <ul className="mt-3 space-y-2" aria-live="polite">
           {items.map((i) => (
-            <li key={i.id} className="rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm">
-              <div className="flex items-center gap-2">
+            <li key={i.id} className="glass rounded-xl px-3.5 py-2.5 text-sm animate-fade-up">
+              <div className="flex items-center gap-2.5">
                 <StatusIcon phase={i.phase} />
                 <span className="min-w-0 flex-1 truncate font-medium">{i.name}</span>
                 <span className="shrink-0 text-xs text-muted">
@@ -101,9 +112,9 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
                 <div
                   role="progressbar" aria-label={`Upload progress for ${i.name}`} aria-valuemin={0} aria-valuemax={100}
                   aria-valuenow={i.phase === "indexing" ? undefined : Math.round(i.progress * 100)}
-                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-paper"
+                  className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-hover"
                 >
-                  <div className={cn("h-full bg-accent transition-[width]", i.phase === "indexing" && "w-full animate-pulse")}
+                  <div className={cn("h-full rounded-full bg-gradient-to-r from-brand to-cyan transition-[width] duration-200", i.phase === "indexing" && "w-full animate-pulse")}
                        style={i.phase === "uploading" ? { width: `${i.progress * 100}%` } : undefined} />
                 </div>
               )}

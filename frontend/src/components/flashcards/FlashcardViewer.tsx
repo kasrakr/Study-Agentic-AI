@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 import type { CardDifficulty, Deck, Flashcard } from "@/types/api";
 
 const RATINGS: { value: CardDifficulty; label: string; cls: string }[] = [
-  { value: "easy", label: "Easy", cls: "border-emerald-300 bg-emerald-50 text-ok" },
-  { value: "medium", label: "Medium", cls: "border-amber-300 bg-amber-50 text-warn" },
-  { value: "difficult", label: "Difficult", cls: "border-red-300 bg-danger-soft text-danger" },
+  { value: "easy", label: "Easy", cls: "border-ok/40 bg-ok-soft text-ok hover:bg-ok/20" },
+  { value: "medium", label: "Medium", cls: "border-warn/40 bg-warn-soft text-warn hover:bg-warn/20" },
+  { value: "difficult", label: "Difficult", cls: "border-danger/40 bg-danger-soft text-danger hover:bg-danger/20" },
 ];
 
 export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: Deck; onNewDeck: () => void }) {
@@ -60,8 +60,8 @@ export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: De
     const count = (d: CardDifficulty | null) => cards.filter((c) => c.difficulty === d).length;
     const hard = cards.filter((c) => c.difficulty === "difficult").map((c) => c.id);
     return (
-      <section className="rounded-lg border border-line bg-surface p-6 text-center" aria-labelledby="done-heading">
-        <h2 id="done-heading" className="font-display text-2xl font-semibold">Deck complete</h2>
+      <section className="glass rounded-2xl p-6 text-center" aria-labelledby="done-heading">
+        <h2 id="done-heading" className="text-2xl font-semibold">Deck complete</h2>
         <p className="mt-2 text-sm text-muted">
           {count("easy")} easy · {count("medium")} medium · {count("difficult")} difficult · {count(null)} not rated
         </p>
@@ -81,9 +81,9 @@ export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: De
         <button type="button" onClick={onNewDeck} className="underline">New deck</button>
       </div>
 
-      <div className="rounded-xl border border-line bg-surface p-6 sm:p-8" aria-live="polite">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted">{revealed ? "Answer" : "Question"} · {card!.topic}</p>
-        <p className="mt-3 min-h-24 whitespace-pre-wrap font-display text-xl leading-relaxed">{revealed ? card!.back : card!.front}</p>
+      <div className="glass-strong rounded-2xl p-6 sm:p-8" aria-live="polite">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">{revealed ? "Answer" : "Question"} · {card!.topic}</p>
+        <p key={revealed ? "back" : "front"} className="mt-3 min-h-24 whitespace-pre-wrap text-xl leading-relaxed animate-fade-in">{revealed ? card!.back : card!.front}</p>
         {revealed && <p className="mt-4 border-t border-line pt-3 text-sm text-muted"><span className="font-medium text-ink">Q:</span> {card!.front}</p>}
         <p className="mt-4 text-xs text-muted">
           Source:{" "}
@@ -105,7 +105,7 @@ export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: De
           <div className="flex flex-wrap gap-2">
             {RATINGS.map((r) => (
               <button key={r.value} type="button" disabled={saving} aria-pressed={card!.difficulty === r.value} onClick={() => void rate(r.value)}
-                      className={cn("rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-60", r.cls, card!.difficulty === r.value && "ring-2 ring-current")}>
+                      className={cn("rounded-xl border px-4 py-2 text-sm font-medium transition-all active:scale-[0.97] disabled:opacity-60", r.cls, card!.difficulty === r.value && "ring-2 ring-current")}>
                 {r.label}
               </button>
             ))}

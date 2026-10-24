@@ -50,19 +50,19 @@ export default function Flashcards() {
       {!loading && !deck && (
         docs.status === "loading" ? <Spinner label="Loading documents…" /> :
         docs.status === "error" ? <Notice tone="error">{docs.error.message}</Notice> : (
-          <form className="space-y-5 rounded-lg border border-line bg-surface p-5" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
+          <form className="space-y-5 glass rounded-2xl p-5" onSubmit={(e) => { e.preventDefault(); void generate(); }}>
             <DocumentPicker documents={docs.indexed} selected={docIds} onChange={setDocIds} legend="Create flashcards from" />
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label htmlFor="f-count" className="text-sm font-medium">Number of cards</label>
                 <input id="f-count" type="number" min={1} max={30} value={count}
                        onChange={(e) => setCount(Math.max(1, Math.min(30, Number(e.target.value) || 1)))}
-                       className="mt-1.5 block w-24 rounded-md border border-line px-3 py-2" />
+                       className="mt-1.5 block w-24 field" />
               </div>
               <div>
                 <label htmlFor="f-topic" className="text-sm font-medium">Topic <span className="font-normal text-muted">(optional)</span></label>
                 <input id="f-topic" value={topic} maxLength={200} onChange={(e) => setTopic(e.target.value)}
-                       className="mt-1.5 block w-full rounded-md border border-line px-3 py-2" />
+                       className="mt-1.5 block w-full field" />
               </div>
             </div>
             {error && <Notice tone="error" title="Couldn’t create flashcards">{error}</Notice>}

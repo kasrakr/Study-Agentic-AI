@@ -27,7 +27,7 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
 
   return (
     <form
-      className="space-y-5 rounded-lg border border-line bg-surface p-5"
+      className="space-y-5 glass rounded-2xl p-5"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onGenerate({ document_ids: docIds, question_count: count, question_types: types, difficulty, topic: topic.trim() || undefined });
@@ -40,13 +40,13 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
           <label htmlFor="q-count" className="text-sm font-medium">Number of questions</label>
           <input id="q-count" type="number" min={1} max={20} value={count}
                  onChange={(e) => setCount(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
-                 className="mt-1.5 block w-24 rounded-md border border-line px-3 py-2" />
+                 className="mt-1.5 block w-24 field" />
         </div>
         <fieldset>
           <legend className="text-sm font-medium">Difficulty</legend>
-          <div className="mt-1.5 inline-flex overflow-hidden rounded-md border border-line" role="radiogroup">
+          <div className="mt-1.5 glass inline-flex overflow-hidden rounded-xl" role="radiogroup">
             {DIFFICULTIES.map((d) => (
-              <label key={d} className={cn("cursor-pointer px-3.5 py-2 text-sm capitalize", difficulty === d ? "bg-accent text-white" : "hover:bg-paper")}>
+              <label key={d} className={cn("cursor-pointer px-3.5 py-2 text-sm capitalize transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent", difficulty === d ? "bg-brand-gradient text-white" : "hover:bg-hover")}>
                 <input type="radio" name="difficulty" value={d} checked={difficulty === d} onChange={() => setDifficulty(d)} className="sr-only" />
                 {d}
               </label>
@@ -59,8 +59,8 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
         <legend className="text-sm font-medium">Question types</legend>
         <div className="mt-1.5 flex flex-wrap gap-2">
           {TYPES.map((t) => (
-            <label key={t.value} className={cn("flex cursor-pointer items-start gap-2 rounded-md border px-3 py-2 text-sm", types.includes(t.value) ? "border-accent bg-accent-soft" : "border-line")}>
-              <input type="checkbox" checked={types.includes(t.value)} onChange={() => toggleType(t.value)} className="mt-0.5 size-4 accent-[var(--color-accent)]" />
+            <label key={t.value} className={cn("flex cursor-pointer items-start gap-2 rounded-xl border px-3 py-2 text-sm transition-colors", types.includes(t.value) ? "border-accent/60 bg-accent-soft" : "border-line hover:bg-hover")}>
+              <input type="checkbox" checked={types.includes(t.value)} onChange={() => toggleType(t.value)} className="mt-0.5 size-4 accent-[var(--color-brand)]" />
               <span>{t.label}<span className="block text-xs text-muted">{t.hint}</span></span>
             </label>
           ))}
@@ -70,7 +70,7 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
       <div>
         <label htmlFor="q-topic" className="text-sm font-medium">Focus on a topic <span className="font-normal text-muted">(optional)</span></label>
         <input id="q-topic" value={topic} maxLength={200} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. cellular respiration"
-               className="mt-1.5 block w-full rounded-md border border-line px-3 py-2" />
+               className="mt-1.5 block w-full field" />
       </div>
 
       {error && <Notice tone="error" title="Couldn’t create the quiz">{error}</Notice>}

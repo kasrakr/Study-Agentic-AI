@@ -56,7 +56,7 @@ function OpenAICheck() {
 
   return (
     <section aria-labelledby="verify-heading" className="mt-10">
-      <h2 id="verify-heading" className="font-display text-xl font-semibold">
+      <h2 id="verify-heading" className="text-lg font-semibold tracking-tight">
         Verify OpenAI access
       </h2>
       <p className="mt-1 max-w-prose text-sm text-muted">
@@ -67,7 +67,7 @@ function OpenAICheck() {
         type="button"
         onClick={run}
         disabled={state.status === "running"}
-        className="mt-4 inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-60"
+        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2 text-sm font-medium text-white shadow-glow transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-60"
       >
         {state.status === "running" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <ShieldCheck className="size-4" aria-hidden />}
         {state.status === "running" ? "Checking…" : "Check connection"}
@@ -75,13 +75,13 @@ function OpenAICheck() {
 
       <div aria-live="polite" className="mt-4">
         {state.status === "done" && (
-          <ul className="rounded-lg border border-line bg-surface px-4 py-2">
+          <ul className="glass rounded-2xl px-4 py-2">
             <ProbeLine name="Embeddings" probe={state.result.embedding} />
             <ProbeLine name="Chat" probe={state.result.chat} />
           </ul>
         )}
         {state.status === "error" && (
-          <p role="alert" className="rounded-lg bg-danger-soft px-4 py-3 text-sm text-danger">
+          <p role="alert" className="rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
             {state.message}
           </p>
         )}
@@ -97,20 +97,20 @@ export default function SystemStatus() {
     <div>
       <section aria-labelledby="status-heading" className="mt-8">
         <div className="flex items-center justify-between">
-          <h2 id="status-heading" className="font-display text-xl font-semibold">
+          <h2 id="status-heading" className="text-lg font-semibold tracking-tight">
             System status
           </h2>
           <button
             type="button"
             onClick={health.reload}
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-muted hover:bg-surface hover:text-ink"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-hover hover:text-ink"
           >
             <RefreshCw className="size-3.5" aria-hidden />
             Refresh
           </button>
         </div>
 
-        <div aria-live="polite" className="mt-3 rounded-lg border border-line bg-surface px-5">
+        <div aria-live="polite" className="glass mt-3 rounded-2xl px-5">
           {health.status === "loading" && (
             <p className="flex items-center gap-2 py-4 text-sm text-muted">
               <Loader2 className="size-4 animate-spin" aria-hidden /> Contacting backend…

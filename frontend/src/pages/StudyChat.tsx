@@ -1,32 +1,36 @@
-import { BookOpenText, BrainCircuit, FileQuestion, Layers, ChevronDown, Sparkles, UploadCloud } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import Composer from "@/components/chat/Composer";
+import { ArrowDown, ChevronDown } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import ChatEmptyState, { type Starter } from "@/components/chat/ChatEmptyState";
+import ChatHeader, { type SystemState } from "@/components/chat/ChatHeader";
+import Composer, { type ComposerHandle } from "@/components/chat/Composer";
 import ConversationList from "@/components/chat/ConversationList";
 import MessageBubble from "@/components/chat/MessageBubble";
 import DocumentPicker from "@/components/documents/DocumentPicker";
+import Drawer from "@/components/ui/Drawer";
 import { Notice } from "@/components/ui/feedback";
+import { useToast } from "@/components/ui/Toast";
 import { useAsync } from "@/hooks/useAsync";
 import { useChat } from "@/hooks/useChat";
 import { useDocuments } from "@/hooks/useDocuments";
 import { api } from "@/lib/api";
 import { errorMessage, plural } from "@/lib/format";
 
-const STARTERS = [
-  { icon: BookOpenText, title: "Explain a difficult concept", prompt: "Explain a difficult concept from my study materials in simple terms." },
-  { icon: FileQuestion, title: "Build an exam-style quiz", prompt: "Quiz me on the most important ideas in my documents." },
-  { icon: BrainCircuit, title: "Find the key ideas", prompt: "Summarize the key ideas in my documents and explain how they connect." },
-  { icon: Layers, title: "Create revision flashcards", prompt: "Create flashcards for the most important concepts in my documents." },
-];
+const NEAR_BOTTOM_PX = 120;
 
 export default function StudyChat() {
   const docs = useDocuments();
   const conversations = useAsync((signal) => api.listConversations(signal));
   const chat = useChat(conversations.reload);
+  const toast = useToast();
   const [scope, setScope] = useState<string[]>([]); // empty = search every indexed document
   const [params, setParams] = useSearchParams();
   const [actionError, setActionError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showJump, setShowJump] = useState(false);
+  const scroller = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  const composer = useRef<ComposerHandle>(null);
   const openedFromUrl = useRef(false);
 
   // Deep link from the dashboard: /chat?c=<conversation id>
@@ -35,24 +39,56 @@ export default function StudyChat() {
     const id = params.get("c");
     if (id && !openedFromUrl.current) {
       openedFromUrl.current = true;
+      stickToBottom.current = true;
       void open(id);
       setParams({}, { replace: true });
     }
   }, [params, open, setParams]);
 
-  const lastLength = chat.messages.at(-1)?.content.length ?? 0;
+  // Follow new content only while the student is already at the bottom, so reading earlier answers is never interrupted.
+  const last = chat.messages.at(-1);
+  const followKey = `${chat.messages.length}:${last?.content.length ?? 0}:${last?.steps.length ?? 0}:${last?.status ?? ""}`;
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      block: "end",
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-    });
-  }, [chat.messages.length, lastLength]);
+    const el = scroller.current;
+    if (!el) return;
+    if (stickToBottom.current) el.scrollTop = el.scrollHeight;
+    else setShowJump(true);
+  }, [followKey]);
+
+  const onScroll = useCallback(() => {
+    const el = scroller.current;
+    if (!el) return;
+    const near = el.scrollHeight - el.scrollTop - el.clientHeight < NEAR_BOTTOM_PX;
+    stickToBottom.current = near;
+    if (near) setShowJump(false);
+  }, []);
+
+  function jumpToLatest() {
+    const el = scroller.current;
+    if (!el) return;
+    stickToBottom.current = true;
+    setShowJump(false);
+    if (typeof el.scrollTo === "function") el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    else el.scrollTop = el.scrollHeight;
+  }
+
+  const send = useCallback((question: string) => {
+    stickToBottom.current = true;
+    setShowJump(false);
+    void chat.send(question, scope);
+  }, [chat, scope]);
+
+  function pick(starter: Starter) {
+    if (starter.mode === "send") send(starter.prompt);
+    else composer.current?.fill(starter.prompt);
+  }
 
   const indexedCount = docs.indexed.length;
   const scopeLabel = useMemo(
     () => (scope.length === 0 ? `Searching all ${plural(indexedCount, "document")}` : `Searching ${plural(scope.length, "selected document")}`),
     [scope, indexedCount],
   );
+  const systemState: SystemState = docs.status === "loading" ? "loading" : docs.status === "error" ? "unreachable" : "ready";
 
   async function removeConversation(id: string) {
     setActionError(null);
@@ -60,106 +96,78 @@ export default function StudyChat() {
       await api.deleteConversation(id);
       if (id === chat.conversationId) chat.reset();
       conversations.reload();
+      toast.push("Conversation deleted.", "success");
     } catch (err) {
       setActionError(errorMessage(err));
     }
   }
 
+  const list = (
+    <ConversationList
+      conversations={conversations.data?.conversations ?? []} activeId={chat.conversationId}
+      loading={conversations.status === "loading"} disabled={chat.busy}
+      onOpen={(id) => { setDrawerOpen(false); stickToBottom.current = true; void chat.open(id); }}
+      onDelete={removeConversation}
+      onNew={() => { setDrawerOpen(false); chat.reset(); }}
+    />
+  );
+
   return (
-    <div className="study-chat-layout grid gap-5 md:grid-cols-[13.5rem_minmax(0,1fr)] xl:grid-cols-[14.5rem_minmax(0,1fr)]">
-      <aside className="conversation-rail">
-        <div className="mb-3 hidden items-center justify-between px-1 md:flex">
-          <span className="text-[10px] font-bold tracking-[0.15em] text-slate-500">YOUR CHATS</span>
-          <span className="rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[10px] text-slate-500">{conversations.data?.conversations.length ?? 0}</span>
-        </div>
-        <details className="md:hidden" open={false}>
-          <summary className="cursor-pointer rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium">Conversations</summary>
-          <div className="mt-2">
-            <ConversationList conversations={conversations.data?.conversations ?? []} activeId={chat.conversationId}
-              onOpen={chat.open} onDelete={removeConversation} onNew={chat.reset} />
-          </div>
-        </details>
-        <div className="hidden md:block">
-          <ConversationList conversations={conversations.data?.conversations ?? []} activeId={chat.conversationId}
-            onOpen={chat.open} onDelete={removeConversation} onNew={chat.reset} />
-        </div>
-        <div className="mt-5 hidden border-t border-white/[0.07] pt-4 md:block">
-          <p className="px-1 text-[10px] font-bold tracking-[0.13em] text-slate-600">QUICK NOTE</p>
-          <p className="mt-2 px-1 text-xs leading-relaxed text-slate-500">Answers prioritize indexed documents, with citations to help you verify the details.</p>
-        </div>
+    <div className="flex h-full min-h-0 flex-1">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-line p-4 lg:flex">
+        <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.08em] text-faint">Conversations</h2>
+        {list}
       </aside>
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Conversations">{list}</Drawer>
 
-      <section className="chat-section flex min-w-0 flex-col" aria-label="Study chat">
-        <header className="mb-5">
-          <div className="chat-heading-row">
-            <div className="min-w-0">
-              <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.17em] text-sky-300">
-                <span className="size-1.5 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.75)]" aria-hidden />
-                Your learning workspace
-              </div>
-              <h1 className="chat-heading font-display font-semibold">Study chat</h1>
-              <p className="chat-subtitle mt-2 text-sm">
-                Ask questions, explore ideas, and turn your documents into a deeper understanding.
-              </p>
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Study chat">
+        <ChatHeader
+          state={systemState} indexedCount={indexedCount} busy={chat.busy}
+          onOpenConversations={() => setDrawerOpen(true)} onNew={chat.reset} newDisabled={chat.busy || chat.messages.length === 0}
+        />
+
+        <div className="border-b border-line px-3 py-2 sm:px-5">
+          <details className="group">
+            <summary className="flex w-fit max-w-full cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-hover px-3 py-1.5 text-xs text-muted transition-colors hover:border-line-strong hover:text-ink [&::-webkit-details-marker]:hidden">
+              <ChevronDown className="size-3.5 shrink-0 transition-transform duration-200 group-open:rotate-180" aria-hidden />
+              <span className="truncate">{docs.status === "loading" ? "Loading documents…" : scopeLabel}</span>
+            </summary>
+            <div className="mt-3 max-w-xl animate-fade-in pb-1">
+              <DocumentPicker documents={docs.indexed} selected={scope} onChange={setScope} legend="Limit to these documents (none selected = all)" />
+              <p className="mt-2 text-xs text-faint">Answers come from your uploaded documents first. The web is searched only if they don’t contain enough.</p>
             </div>
-            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 text-[11px] text-slate-400 sm:flex">
-              <BookOpenText className="size-3.5 text-sky-300" aria-hidden />
-              <span>{indexedCount} indexed {indexedCount === 1 ? "document" : "documents"}</span>
-            </div>
-          </div>
-        </header>
+          </details>
+        </div>
 
-        <details className="document-scope mb-3 px-3" open={false}>
-          <summary className="flex list-none items-center gap-2 text-sm text-slate-300">
-            <ChevronDown className="size-4 text-sky-300" aria-hidden />
-            <span>{docs.status === "loading" ? "Loading documents…" : scopeLabel}</span>
-            <span className="ml-auto text-xs text-slate-500">Sources</span>
-          </summary>
-          <div className="border-t border-white/[0.07] pb-3 pt-3">
-            <DocumentPicker documents={docs.indexed} selected={scope} onChange={setScope} legend="Limit to these documents (none selected = all)" />
-          </div>
-        </details>
+        {(chat.loadError || actionError) && <Notice tone="error" className="mx-3 mt-3 sm:mx-5">{chat.loadError ?? actionError}</Notice>}
 
-        {(chat.loadError || actionError) && <Notice tone="error" className="mb-3">{chat.loadError ?? actionError}</Notice>}
-
-        <div className="conversation-stream custom-scrollbar flex-1 space-y-4" role="log" aria-live="off" aria-label="Conversation">
-          {chat.messages.length === 0 ? (
-            <div className="chat-empty-state">
-              <div className="chat-orb" aria-hidden><Sparkles className="size-7" strokeWidth={1.6} /></div>
-              <p className="mt-5 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-300/90">A smarter way to study</p>
-              <h2 className="chat-empty-title font-display font-semibold">What are you studying today?</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-400">
-                Your study companion can explain complex ideas, connect concepts, and help you prepare for your next exam.
-              </p>
-              {indexedCount > 0 ? (
-                <div className="prompt-grid">
-                  {STARTERS.map(({ icon: Icon, title, prompt }) => (
-                    <button key={title} type="button" onClick={() => void chat.send(prompt, scope)} className="prompt-suggestion">
-                      <Icon className="size-[18px]" strokeWidth={1.8} aria-hidden />
-                      <span className="min-w-0 flex-1">{title}</span>
-                    </button>
-                  ))}
-                </div>
+        <div className="relative min-h-0 flex-1">
+          <div ref={scroller} onScroll={onScroll} className="absolute inset-0 overflow-y-auto overscroll-contain px-3 sm:px-5" role="log" aria-live="off" aria-label="Conversation">
+            <div className="mx-auto min-h-full max-w-3xl">
+              {chat.messages.length === 0 ? (
+                <ChatEmptyState indexedCount={indexedCount} loading={docs.status === "loading"} onPick={pick} />
               ) : (
-                <div className="mt-5 flex flex-col items-center gap-3">
-                  <p className="max-w-sm text-xs leading-relaxed text-slate-500">Upload lecture notes or a PDF to unlock document-grounded answers and page-level citations.</p>
-                  <Link to="/library" className="inline-flex items-center gap-2 rounded-xl border border-blue-400/25 bg-blue-500/10 px-4 py-2.5 text-sm font-medium text-blue-100 transition hover:border-blue-300/45 hover:bg-blue-500/15">
-                    <UploadCloud className="size-4" aria-hidden /> Add study materials
-                  </Link>
+                <div className="space-y-7 py-6">
+                  {chat.messages.map((m) => <MessageBubble key={m.id} message={m} />)}
                 </div>
               )}
             </div>
-          ) : (
-            chat.messages.map((m) => <MessageBubble key={m.id} message={m} />)
+          </div>
+
+          {showJump && (
+            <button
+              type="button" onClick={jumpToLatest} aria-label="Jump to the latest message" data-tip="Jump to latest"
+              className="tip glass-strong absolute bottom-3 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full text-ink transition-transform hover:-translate-y-0.5 active:scale-95 animate-fade-in"
+            >
+              <ArrowDown className="size-4" aria-hidden />
+            </button>
           )}
-          <div ref={bottomRef} />
         </div>
 
-        <div className="composer-dock">
-          <Composer busy={chat.busy} onSend={(q) => void chat.send(q, scope)} onStop={chat.stop} />
-          <p className="mt-2 flex items-center justify-center gap-1.5 text-center composer-hint">
-            <span>Enter to send</span><span className="text-slate-700">·</span><span>Shift + Enter for a new line</span>
-          </p>
+        <div className="px-3 pb-3 pt-2 sm:px-5 sm:pb-4">
+          <div className="mx-auto max-w-3xl">
+            <Composer ref={composer} busy={chat.busy} onSend={send} onStop={chat.stop} />
+          </div>
         </div>
       </section>
     </div>
