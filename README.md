@@ -356,11 +356,11 @@ A JSON report is written to `evals/results/`.
 
 | Metric | Vector | Hybrid |
 |---|---:|---:|
-| Retrieval hit rate | 1.0 | _—_ |
-| MRR | 1.0 | _—_ |
-| Faithful answers (all claims supported) | 1.0 | _—_ |
-| Valid citations | 1.0 | _—_ |
-| Web decision accuracy | 0.917 | _—_ |
+| Retrieval hit rate | 1.0 | 1.0 |
+| MRR | 1.0 | 1.0 |
+| Faithful answers (all claims supported) | 1.0 | 0.9 |
+| Valid citations | 1.0 | 1.0 |
+| Web decision accuracy | 0.917 | 0.917 |
 
 <div align="center">
 
