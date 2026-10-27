@@ -89,7 +89,7 @@ On top of the chat, the same indexed material powers **auto-graded quizzes**, **
 
 ## ⚙️ How It Works
 
-<img src="docs/images/how-it-works.png" width="900" />
+<img src="docs/images/how-it-works.png" width="700" />
 
 Documents are split **page by page** so every citation keeps an exact page number. Conversation state is checkpointed to SQLite, so chats survive restarts.
 
