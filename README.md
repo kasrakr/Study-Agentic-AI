@@ -304,7 +304,7 @@ A JSON report is written to `evals/results/`.
 <div align="center">
 
 <!-- 🖼️ IMAGE SLOT 11 — Terminal screenshot of `python -m app.evals.run` output, or a chart of vector vs hybrid -->
-<img src="docs/images/evals.png" alt="Evaluation output" width="800" />
+<img src="docs/images/evals2.png" alt="Evaluation output" width="800" />
 
 </div>
 
