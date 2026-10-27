@@ -89,38 +89,7 @@ On top of the chat, the same indexed material powers **auto-graded quizzes**, **
 
 ## ⚙️ How It Works
 
-```text
-┌──────────────────────────────┐
-│   Upload PDF / TXT / Markdown │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│   Extract → Chunk → Embed     │
-│   page numbers preserved      │
-│   text-embedding-3-small      │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│   ChromaDB vector index       │
-│   (+ BM25 keyword search)     │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│   LangGraph study agent       │
-│   classify → retrieve → grade │
-│   → rewrite → web → answer    │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│   Streaming answer (SSE)      │
-│   validated [D1] / [W1] cites │
-│   live agent timeline in UI   │
-└──────────────────────────────┘
-```
+<img src="docs/images/how-it-works.png" width="900" />
 
 Documents are split **page by page** so every citation keeps an exact page number. Conversation state is checkpointed to SQLite, so chats survive restarts.
 
@@ -217,37 +186,7 @@ Documents are split **page by page** so every citation keeps an exact page numbe
 
 Every chat message runs through a LangGraph `StateGraph`:
 
-```text
-START → classify_intent
-          │
-          ├── smalltalk ───────────────► respond_smalltalk ──► END
-          ├── quiz ────────────────────► generate_quiz ──────► END
-          ├── flashcards ──────────────► generate_flashcards ► END
-          │
-          └── study_question / explain_simply
-                    │
-                    ▼
-            retrieve_documents
-                    │
-                    ▼
-          grade_document_evidence
-                    │
-        ┌───────────┼───────────────────────┐
-        │ sufficient │ weak / partial        │ insufficient (or web requested)
-        ▼            ▼                       ▼
- generate_answer  rewrite_query ──► retrieve_documents   identify_missing_information
-        │         (bounded retries)                               │
-        │                                                         ▼
-        │                                                    web_search
-        │                                                         │
-        │                                                         ▼
-        │                                                 grade_web_evidence
-        │                                                         │
-        └──────────────────────────► generate_answer ◄────────────┘
-                                            │
-                                            ▼
-                                           END
-```
+<img src="docs/images/graph.png" width="900" />
 
 | Node | What it does |
 |---|---|
@@ -424,46 +363,11 @@ A JSON report is written to `evals/results/`.
 
 ### System Overview
 
-```text
-┌─────────────────────────┐        HTTP / SSE         ┌──────────────────────────────┐
-│  React + Vite frontend  │ ────────────────────────► │        FastAPI backend       │
-│  Dashboard · Chat       │                           │  api/  routers + error maps  │
-│  Library · Quiz · Cards │ ◄──────────────────────── │  services/ business logic    │
-└─────────────────────────┘     streamed tokens +     │  agent/  LangGraph workflow  │
-                                agent step events     │  rag/    load·chunk·index    │
-                                                      └───────┬──────────┬───────────┘
-                                                              │          │
-                                          ┌───────────────────┘          └──────────────────┐
-                                          ▼                                                 ▼
-                              ┌───────────────────────┐                      ┌──────────────────────────┐
-                              │  storage/             │                      │  External APIs           │
-                              │  study.db  (SQLite)   │                      │  OpenAI-compatible chat  │
-                              │  checkpoints.sqlite   │                      │  + embeddings            │
-                              │  vectorstore/ (Chroma)│                      │  Tavily web search (opt.)│
-                              │  uploads/             │                      └──────────────────────────┘
-                              └───────────────────────┘
-```
+<img src="docs/images/architecture.png" width="900" />
 
 ### Ingestion Flow
 
-```text
-Upload (PDF / TXT / MD)
-        │
-        ▼
- Validate type + size + SHA-256 ──► sanitized filename, internal stored name
-        │
-        ▼
- Extract text (page-aware)
-        │
-        ▼
- Chunk per page ──► deterministic ids: <document_id>-p<page>-c<n>
-        │
-        ▼
- Embed in batches ──► ChromaDB   (+ BM25 candidates for hybrid mode)
-        │
-        ▼
- Status: processing → indexed | failed (with a readable error)
-```
+<img src="docs/images/ingestion.png" width="900" />
 
 ### Design Decisions
 
@@ -640,34 +544,7 @@ python scripts/fake_server.py --port 8766 --tavily
 
 ## 📂 Project Structure
 
-```text
-Study-Agentic-AI/
-├── backend/
-│   ├── app/
-│   │   ├── agent/        # LangGraph graph, nodes, routing, prompts, state, citations
-│   │   ├── api/          # FastAPI routers (documents, chat, quizzes, flashcards, progress, health)
-│   │   ├── rag/          # loader, chunking, embeddings, vector index, retriever, BM25
-│   │   ├── services/     # document, chat, quiz, flashcard, progress, web search
-│   │   ├── schemas/      # Pydantic request / response models
-│   │   ├── db/           # SQLAlchemy models + session setup
-│   │   ├── evals/        # metrics, dataset loader, runner, CLI
-│   │   ├── config.py     # single source of truth for settings
-│   │   ├── resilience.py # bounded retries for provider calls
-│   │   └── main.py       # FastAPI app factory
-│   ├── scripts/          # fake_server.py, smoke_live.py
-│   ├── tests/
-│   └── pyproject.toml
-├── frontend/
-│   └── src/
-│       ├── pages/        # Dashboard, StudyChat, Library, Quiz, Flashcards
-│       ├── components/   # chat, documents, quiz, flashcards, sources, layout, ui
-│       ├── hooks/        # useChat, useDocuments, useAsync, useTheme
-│       └── lib/          # API client (SSE), chat state, formatting
-├── evals/                # questions.jsonl + sample documents + results/
-├── storage/              # SQLite, vector store, uploads (git-ignored contents)
-├── docs/images/          # README screenshots
-└── docker-compose.yml
-```
+<img src="docs/images/structure.png" width="900" />
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
