@@ -44,3 +44,6 @@ Thumbs.db
 *.log
 evals/results/*
 !evals/results/.gitkeep
+
+# Proprietary Anjoman font: install a licensed copy locally.
+/frontend/public/fonts/Anjoman-Bold.ttf
