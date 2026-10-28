@@ -13,7 +13,7 @@ const MAX_LENGTH = 4000;
 const MAX_HEIGHT_PX = 176;
 
 function Kbd({ children }: { children: string }) {
-  return <kbd className="rounded-md border border-sine bg-hover px-1.5 py-px font-mono text-[0.65rem] text-muted">{children}</kbd>;
+  return <kbd className="rounded-md border border-line bg-hover px-1.5 py-px font-mono text-[0.65rem] text-muted">{children}</kbd>;
 }
 
 export default function Composer({ busy, onSend, onStop, placeholder, ref }: {
@@ -90,7 +90,7 @@ export default function Composer({ busy, onSend, onStop, placeholder, ref }: {
         {busy ? (
           <button
             type="button" onClick={onStop} aria-label={tr("Stop generating")} data-tip={tr("Stop generating")}
-            className="tip mb-0.5 inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-sine-strong bg-hover px-3 text-sm font-medium transition-all hover:bg-surface-strong active:scale-95"
+            className="tip mb-0.5 inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-line-strong bg-hover px-3 text-sm font-medium transition-all hover:bg-surface-strong active:scale-95"
           >
             <Square className="size-3.5 fill-current" aria-hidden /> <span className="hidden sm:inline">{tr("Stop")}</span>
           </button>
