@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/* The font is supplied locally by a licensed user, not checked into the public repository. */
+@font-face {
+  font-family: "Anjoman";
+  src: url("/fonts/Anjoman-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root[lang="fa"] { font-family: "Anjoman", Tahoma, Arial, sans-serif; }
+:root[lang="fa"] body { font-family: "Anjoman", Tahoma, Arial, sans-serif; font-feature-settings: normal; line-height: 1.7; }
+:root[lang="fa"] :is(button, input, select, textarea) { font-family: inherit; }
+:root[lang="fa"] :is(.font-mono, pre, code, kbd, samp) { direction: ltr; unicode-bidi: isolate; }
+:root[lang="fa"] :is(.tracking-tight, .tracking-\\[0\\.08em\\]) { letter-spacing: normal; }
+:root[dir="rtl"] .prose-answer { text-align: start; }
+:root[dir="rtl"] .prose-answer blockquote { border-left: 0; padding-left: 0; border-inline-start: 3px solid rgb(96 165 250 / 0.5); padding-inline-start: 0.9rem; }
+:root[dir="rtl"] .prose-answer th, :root[dir="rtl"] .prose-answer td { text-align: start; }
+:root[dir="rtl"] .tip-side::after { left: auto; right: calc(100% + 10px); translate: -4px 50%; }
+:root[dir="rtl"] .tip-side:hover::after, :root[dir="rtl"] .tip-side:focus-visible::after { translate: 0 50%; }
+:root[dir="ltr"] .tip-side::after { left: calc(100% + 10px); bottom: 50%; translate: 4px 50%; }
+:root[dir="ltr"] .tip-side:hover::after, :root[dir="ltr"] .tip-side:focus-visible::after { translate: 0 50%; }
+
+
 /*
  * Design system
  * -------------
@@ -180,6 +203,7 @@ body {
 }
 
 h1, h2, h3, h4 { letter-spacing: -0.015em; }
+:root[lang="fa"] h1, :root[lang="fa"] h2, :root[lang="fa"] h3, :root[lang="fa"] h4 { letter-spacing: normal; }
 code, kbd, pre, samp { font-family: var(--font-mono); }
 :not(pre) > code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 6px; padding: 0.08rem 0.35rem; font-size: 0.85em; color: var(--code-ink); overflow-wrap: anywhere; }
 
