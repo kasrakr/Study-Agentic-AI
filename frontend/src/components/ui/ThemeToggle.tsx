@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Theme } from "@/hooks/useTheme";
@@ -11,8 +12,9 @@ interface Props {
 }
 
 export default function ThemeToggle({ theme, onToggle, variant = "full", className }: Props) {
+  useTranslation();
   const isLight = theme === "light";
-  const label = isLight ? "Switch to dark mode" : "Switch to light mode";
+  const label = isLight ? tr("Switch to dark mode") : tr("Switch to light mode");
   const Icon = isLight ? Moon : Sun;
 
   if (variant === "tab") {
@@ -22,7 +24,7 @@ export default function ThemeToggle({ theme, onToggle, variant = "full", classNa
         className={cn("flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[0.68rem] font-medium text-muted transition-colors active:text-ink", className)}
       >
         <Icon className="size-5" aria-hidden />
-        <span className="max-w-full truncate">{isLight ? "Dark" : "Light"}</span>
+        <span className="max-w-full truncate">{isLight ? tr("Dark") : tr("Light")}</span>
       </button>
     );
   }
@@ -37,7 +39,7 @@ export default function ThemeToggle({ theme, onToggle, variant = "full", classNa
       )}
     >
       <Icon className="size-4" aria-hidden />
-      {variant === "full" && <span>{isLight ? "Dark mode" : "Light mode"}</span>}
+      {variant === "full" && <span>{isLight ? tr("Dark mode") : tr("Light mode")}</span>}
     </button>
   );
 }
