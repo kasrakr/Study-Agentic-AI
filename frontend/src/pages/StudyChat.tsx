@@ -20,7 +20,6 @@ import { errorMessage, plural } from "@/lib/format";
 const NEAR_BOTTOM_PX = 120;
 
 export default function StudyChat() {
-  useTranslation();
   const { locale } = useTranslation();
   const docs = useDocuments();
   const conversations = useAsync((signal) => api.listConversations(signal));
@@ -117,7 +116,7 @@ export default function StudyChat() {
 
   return (
     <div className="flex h-full min-h-0 flex-1">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line p-4 lg:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-e border-line p-4 lg:flex">
         <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.08em] text-faint">{tr("Conversations")}</h2>
         {list}
       </aside>
