@@ -80,7 +80,7 @@ export default function DocumentList({ documents, onChanged }: { documents: Stud
                 )}
                 {confirming === d.id ? (
                   <>
-                    <Button size="sm" variant="danger" loading={busy === d.id} onClick={() => remove(d)} aria-label={`${tr("Delete")} ${d.filename}`}>
+                    <Button size="sm" variant="danger" loading={busy === d.id} onClick={() => remove(d)} aria-label={`${tr("Confirm delete")} ${d.filename}`}>
                       {tr("Delete")}
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => setConfirming(null)}>{tr("Cancel")}</Button>
