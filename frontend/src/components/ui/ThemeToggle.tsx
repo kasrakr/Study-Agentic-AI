@@ -33,7 +33,7 @@ export default function ThemeToggle({ theme, onToggle, variant = "full", classNa
     <button
       type="button" onClick={onToggle} aria-label={label} data-tip={variant === "icon" ? label : undefined}
       className={cn(
-        "tip tip-right flex w-full items-center gap-3 rounded-xl py-2 text-sm text-muted transition-colors hover:bg-hover hover:text-ink",
+        "tip tip-side flex w-full items-center gap-3 rounded-xl py-2 text-sm text-muted transition-colors hover:bg-hover hover:text-ink",
         variant === "icon" ? "justify-center" : "px-3",
         className,
       )}
