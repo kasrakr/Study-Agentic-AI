@@ -88,7 +88,7 @@ export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: De
         <p key={revealed ? "back" : "front"} className="mt-3 min-h-24 whitespace-pre-wrap text-xl leading-relaxed animate-fade-in">{revealed ? card!.back : card!.front}</p>
         {revealed && <p className="mt-4 border-t border-line pt-3 text-sm text-muted"><span className="font-medium text-ink">Q:</span> {card!.front}</p>}
         <p className="mt-4 text-xs text-muted">
-          Source:{" "}
+          {tr("Source:")}{" "}
           <a href={api.documentFileUrl(card!.document_id, card!.page_number)} target="_blank" rel="noopener noreferrer" className="underline">
             {card!.filename}{card!.page_number != null && `, ${tr("page")} ${card!.page_number}`}
           </a>
