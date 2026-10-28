@@ -47,7 +47,7 @@ export default function SourcesPanel({ messageId, citations, highlight }: {
           <ul className="space-y-2">
             {docs.map((c) => (
               <li key={c.marker} id={sourceDomId(messageId, c.marker)}
-                  className={cn("lift rounded-xl border border-sine border-s-[3px] border-s-accent bg-accent-soft px-3 py-2.5",
+                  className={cn("lift rounded-xl border border-line border-s-[3px] border-s-accent bg-accent-soft px-3 py-2.5",
                     highlight === c.marker && "border-accent/60 ring-2 ring-accent/50 animate-flash")}>
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="rounded-md bg-brand px-1.5 text-[0.7rem] font-semibold leading-[1.15rem] text-white">{c.marker}</span>
@@ -75,7 +75,7 @@ export default function SourcesPanel({ messageId, citations, highlight }: {
           <ul className="space-y-2">
             {web.map((c) => (
               <li key={c.marker} id={sourceDomId(messageId, c.marker)}
-                  className={cn("lift rounded-xl border border-sine border-s-[3px] border-s-web-solid bg-web-soft px-3 py-2.5",
+                  className={cn("lift rounded-xl border border-line border-s-[3px] border-s-web-solid bg-web-soft px-3 py-2.5",
                     highlight === c.marker && "border-web/60 ring-2 ring-web/50 animate-flash")}>
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="rounded-md bg-web-solid px-1.5 text-[0.7rem] font-semibold leading-[1.15rem] text-white">{c.marker}</span>
