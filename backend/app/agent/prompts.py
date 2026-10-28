@@ -110,12 +110,12 @@ Rules:
    displays limitations separately.
 6. Write for a student in Markdown: direct answer first, then a step-by-step explanation when useful,
    key definitions or formulas, and a short example when helpful.
-7. Match the language of the student\x27s latest question (including Persian/Farsi). Keep technical terms,
+7. Match the language of the student's latest question (including Persian/Farsi). Keep technical terms,
    quoted source text and citation markers accurate. Do not translate the cited source content.
 {{style}}"""
 
 STYLE_STANDARD = ""
-STYLE_SIMPLE = """7. The student wants a simple explanation: use plain language and short sentences, keep the
+STYLE_SIMPLE = """8. The student wants a simple explanation: use plain language and short sentences, keep the
    academic meaning intact, and define jargon. If you use an analogy that is not in the sources, label
    it clearly as "an analogy (not from your materials)"."""
 
@@ -129,6 +129,12 @@ Sources:
 SMALLTALK_REPLY = (
     "Hi! I answer questions from your uploaded study materials, with page-level citations. "
     "Ask me about a topic, request a simpler explanation, or ask me to make a quiz or flashcards."
+)
+
+SMALLTALK_REPLY_FA = (
+    "سلام! من دستیار مطالعهٔ شما هستم. با استفاده از جزوه‌ها و فایل‌های بارگذاری‌شده پاسخ می‌دهم "
+    "و در صورت امکان به صفحهٔ منبع ارجاع می‌دهم. می‌توانید سؤال بپرسید، توضیح ساده بخواهید "
+    "یا درخواست آزمون و فلش‌کارت کنید."
 )
 
 # ---- formatting helpers -------------------------------------------------------
