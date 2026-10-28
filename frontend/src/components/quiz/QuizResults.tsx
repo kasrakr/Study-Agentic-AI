@@ -11,7 +11,7 @@ function Verdict({ r }: { r: QuestionResult }) {
   if (r.is_correct === null) return <span className="inline-flex items-center gap-1 text-muted"><CircleMinus className="size-4" aria-hidden /> {tr("Not answered")}</span>;
   if (r.is_correct) return <span className="inline-flex items-center gap-1 text-ok"><CheckCircle2 className="size-4" aria-hidden /> {tr("Correct")}</span>;
   const partial = r.points > 0;
-  return <span className="inline-flex items-center gap-1 text-danger"><XCircle className="size-4" aria-hidden /> {partial ? "Partly correct" : "Incorrect"}</span>;
+  return <span className="inline-flex items-center gap-1 text-danger"><XCircle className="size-4" aria-hidden /> {tr(partial ? "Partly correct" : "Incorrect")}</span>;
 }
 
 export default function QuizResults({ result, onRetry, onNew }: { result: AttemptResult; onRetry: () => void; onNew: () => void }) {
@@ -22,7 +22,7 @@ export default function QuizResults({ result, onRetry, onNew }: { result: Attemp
       <section className="glass rounded-2xl p-5" aria-labelledby="score-heading">
         <h2 id="score-heading" className="text-sm font-medium text-muted">{tr("Your score")}</h2>
         <p className="mt-1 text-4xl font-semibold">{percent}%</p>
-        <p className="text-sm text-muted">{result.points} of {result.max_points} points</p>
+        <p className="text-sm text-muted">{result.points} {tr("of")} {result.max_points} {tr("points")}</p>
         {result.grading_note && <Notice tone="info" className="mt-3"><span className="inline-flex items-center gap-1.5"><Bot className="size-4" aria-hidden />{result.grading_note}</span></Notice>}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button onClick={onRetry}>{tr("Retake this quiz")}</Button>
@@ -52,7 +52,7 @@ export default function QuizResults({ result, onRetry, onNew }: { result: Attemp
               <a href={api.documentFileUrl(r.source.document_id, r.source.page_number)} target="_blank" rel="noopener noreferrer" className="underline">
                 {r.source.filename}{r.source.page_number != null && `, ${tr("page")} ${r.source.page_number}`}
               </a>
-              {" · "}Topic: {r.topic}
+              {" · "}{tr("Topic:")} {r.topic}
             </p>
           </li>
         ))}
