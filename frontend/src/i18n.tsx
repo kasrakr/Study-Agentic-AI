@@ -298,6 +298,13 @@ export function translate(key: string, locale: Locale): string {
   return locale === "fa" ? fa[key] ?? key : key;
 }
 
+/** Translate a static UI label without adding a hook to presentational helpers. */
+export function tr(key: string): string {
+  if (typeof window === "undefined") return key;
+  try { return translate(key, window.localStorage.getItem(STORAGE_KEY) === "fa" ? "fa" : "en"); }
+  catch { return translate(key, document.documentElement.lang === "fa" ? "fa" : "en"); }
+}
+
 interface LanguageContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
@@ -321,7 +328,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try { window.localStorage.setItem(STORAGE_KEY, locale); } catch { /* private browsing */ }
   }, [locale]);
 
-  const value = useMemo(() => ({ locale, setLocale, t: (key: string) => translate(key, locale) }), [locale]);
+  const changeLocale = (next: Locale) => {
+    try { window.localStorage.setItem(STORAGE_KEY, next); } catch { /* private browsing */ }
+    setLocale(next);
+  };
+  const value = useMemo(() => ({ locale, setLocale: changeLocale, t: (key: string) => translate(key, locale) }), [locale]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
