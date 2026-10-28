@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { CheckCircle2, CircleAlert, Loader2, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { useState } from "react";
 import { useAsync } from "@/hooks/useAsync";
@@ -34,7 +35,7 @@ function ProbeLine({ name, probe }: { name: string; probe: ProbeResult }) {
       )}
       <span>
         <span className="font-medium">{name}</span> <span className="text-muted">({probe.model})</span>
-        {probe.ok ? " works." : ` failed: ${probe.error?.message ?? "unknown error"}`}
+        {probe.ok ? ` ${tr("works.")}` : ` ${tr("Failed")}: ${probe.error?.message ?? tr("unknown error")}`}
       </span>
     </li>
   );
@@ -57,10 +58,10 @@ function OpenAICheck() {
   return (
     <section aria-labelledby="verify-heading" className="mt-10">
       <h2 id="verify-heading" className="text-lg font-semibold tracking-tight">
-        Verify OpenAI access
+        {tr("Verify OpenAI access")}
       </h2>
       <p className="mt-1 max-w-prose text-sm text-muted">
-        Sends one tiny embedding request and one tiny chat request using the key in <code>backend/.env</code>. Costs a
+        {tr("Sends one tiny embedding request and one tiny chat request using the key in")} <code>backend/.env</code>. Costs a
         fraction of a cent.
       </p>
       <button
@@ -91,6 +92,7 @@ function OpenAICheck() {
 }
 
 export default function SystemStatus() {
+  useTranslation();
   const health = useAsync((signal) => api.health(signal));
 
   return (
@@ -98,7 +100,7 @@ export default function SystemStatus() {
       <section aria-labelledby="status-heading" className="mt-8">
         <div className="flex items-center justify-between">
           <h2 id="status-heading" className="text-lg font-semibold tracking-tight">
-            System status
+            {tr("System status")}
           </h2>
           <button
             type="button"
@@ -106,14 +108,14 @@ export default function SystemStatus() {
             className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-hover hover:text-ink"
           >
             <RefreshCw className="size-3.5" aria-hidden />
-            Refresh
+            {tr("Refresh")}
           </button>
         </div>
 
         <div aria-live="polite" className="glass mt-3 rounded-2xl px-5">
           {health.status === "loading" && (
             <p className="flex items-center gap-2 py-4 text-sm text-muted">
-              <Loader2 className="size-4 animate-spin" aria-hidden /> Contacting backend…
+              <Loader2 className="size-4 animate-spin" aria-hidden /> {tr("Contacting backend…")}
             </p>
           )}
 
@@ -129,18 +131,18 @@ export default function SystemStatus() {
 
           {health.status === "success" && (
             <dl>
-              <Row label="Backend">
-                <Flag ok yes={`Online (v${health.data.version})`} no="" />
+              <Row label={tr("Backend")}>
+                <Flag ok yes={`${tr("Online")} (v${health.data.version})`} no="" />
               </Row>
-              <Row label="OpenAI API key">
-                <Flag ok={health.data.openai_configured} yes="Configured" no="Missing" />
+              <Row label={tr("OpenAI API key")}>
+                <Flag ok={health.data.openai_configured} yes={tr("Configured")} no={tr("Missing")} />
               </Row>
-              <Row label="Model endpoint">{health.data.openai_base_url}</Row>
-              <Row label="Chat model">{health.data.chat_model}</Row>
-              <Row label="Embedding model">{health.data.embedding_model}</Row>
-              <Row label="Indexed documents">{health.data.indexed_documents}</Row>
-              <Row label="Web search (Tavily)">
-                <Flag ok={health.data.tavily_configured} yes="Configured" no="Not configured" />
+              <Row label={tr("Model endpoint")}>{health.data.openai_base_url}</Row>
+              <Row label={tr("Chat model")}>{health.data.chat_model}</Row>
+              <Row label={tr("Embedding model")}>{health.data.embedding_model}</Row>
+              <Row label={tr("Indexed documents")}>{health.data.indexed_documents}</Row>
+              <Row label={tr("Web search (Tavily)")}>
+                <Flag ok={health.data.tavily_configured} yes={tr("Configured")} no={tr("Not configured")} />
               </Row>
             </dl>
           )}
