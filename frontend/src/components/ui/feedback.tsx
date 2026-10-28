@@ -1,3 +1,4 @@
+import { tr } from "@/i18n";
 import { AlertTriangle, CircleAlert, Info, Loader2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -7,7 +8,7 @@ export function Spinner({ label }: { label?: string }) {
   return (
     <span className="inline-flex items-center gap-2 text-sm text-muted" role="status">
       <Loader2 className="size-4 animate-spin text-accent" aria-hidden />
-      {label ?? "Loading…"}
+      {label ?? tr("Loading…")}
     </span>
   );
 }
