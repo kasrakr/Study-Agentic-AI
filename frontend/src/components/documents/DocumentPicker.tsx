@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { Link } from "react-router-dom";
 import { plural } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -10,11 +11,12 @@ interface Props {
   legend?: string;
 }
 
-export default function DocumentPicker({ documents, selected, onChange, legend = "Documents" }: Props) {
+export default function DocumentPicker({ documents, selected, onChange, legend = tr("Documents") }: Props) {
+  useTranslation();
   if (documents.length === 0) {
     return (
       <p className="rounded-xl border border-line bg-hover px-3 py-2.5 text-sm text-muted">
-        No indexed documents yet. <Link to="/library" className="font-medium text-accent underline underline-offset-2 hover:text-ink">Upload some in the Library</Link>.
+        {tr("No indexed documents yet.")} <Link to="/library" className="font-medium text-accent underline underline-offset-2 hover:text-ink">{tr("Upload some in the Library")}</Link>.
       </p>
     );
   }
@@ -25,8 +27,8 @@ export default function DocumentPicker({ documents, selected, onChange, legend =
         <span>{legend}</span>
         <span className="shrink-0 text-xs font-normal text-muted">
           {plural(selected.length, "selected", "selected")}{" · "}
-          <button type="button" className="rounded underline underline-offset-2 transition-colors hover:text-ink" onClick={() => onChange(documents.map((d) => d.id))}>all</button>{" / "}
-          <button type="button" className="rounded underline underline-offset-2 transition-colors hover:text-ink" onClick={() => onChange([])}>none</button>
+          <button type="button" className="rounded underline underline-offset-2 transition-colors hover:text-ink" onClick={() => onChange(documents.map((d) => d.id))}>{tr("all")}</button>{" / "}
+          <button type="button" className="rounded underline underline-offset-2 transition-colors hover:text-ink" onClick={() => onChange([])}>{tr("none")}</button>
         </span>
       </legend>
       <div className="max-h-52 space-y-1 overflow-y-auto rounded-xl border border-line bg-inset p-1.5">
