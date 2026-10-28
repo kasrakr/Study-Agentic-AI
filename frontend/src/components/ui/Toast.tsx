@@ -1,3 +1,4 @@
+import { tr } from "@/i18n";
 import { CheckCircle2, CircleAlert, Info, X } from "lucide-react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -39,7 +40,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div key={t.id} className="glass-strong pointer-events-auto flex max-w-sm items-start gap-2.5 rounded-xl px-3.5 py-2.5 text-sm animate-toast">
               <Icon className={cn("mt-0.5 size-4 shrink-0", COLORS[t.tone])} aria-hidden />
               <p className="min-w-0 flex-1 break-words">{t.message}</p>
-              <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss notification" className="-mr-1 rounded-md p-1 text-muted transition-colors hover:bg-hover hover:text-ink">
+              <button type="button" onClick={() => dismiss(t.id)} aria-label={tr("Dismiss notification")} className="-mr-1 rounded-md p-1 text-muted transition-colors hover:bg-hover hover:text-ink">
                 <X className="size-3.5" aria-hidden />
               </button>
             </div>
