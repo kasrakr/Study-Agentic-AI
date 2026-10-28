@@ -18,7 +18,7 @@ function Excerpt({ text }: { text: string }) {
       {long && (
         <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)}
                 className="mt-1 inline-flex items-center gap-1 rounded text-xs font-medium text-accent transition-colors hover:text-ink">
-          {open ? "Show less" : "Show more"}
+          {tr(open ? "Show less" : "Show more")}
           <ChevronDown className={cn("size-3 transition-transform duration-200", open && "rotate-180")} aria-hidden />
         </button>
       )}
