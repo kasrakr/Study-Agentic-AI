@@ -81,7 +81,7 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
         <p className="text-sm">
           {dragging ? tr("Release to upload") : (
             <>
-              Drop files here or{" "}
+              {tr("Drop files here or")}{" "}
               <button type="button" className="font-medium text-accent underline underline-offset-2 transition-colors hover:text-ink" onClick={() => inputRef.current?.click()}>
                 {tr("choose files")}
               </button>
@@ -103,7 +103,7 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
                 <StatusIcon phase={i.phase} />
                 <span className="min-w-0 flex-1 truncate font-medium">{i.name}</span>
                 <span className="shrink-0 text-xs text-muted">
-                  {i.phase === "uploading" && `${tr("Upload documents")} ${Math.round(i.progress * 100)}%`}
+                  {i.phase === "uploading" && `${tr("Uploading")} ${Math.round(i.progress * 100)}%`}
                   {i.phase === "indexing" && "Indexing… (reading and embedding)"}
                   {i.phase === "done" && `${tr("Indexed")} · ${formatBytes(i.size)}`}
                   {i.phase === "duplicate" && "Already indexed"}
