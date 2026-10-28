@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { ChevronDown, ExternalLink, FileText, Globe } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -31,16 +32,17 @@ const linkClass = "inline-flex min-w-0 items-center gap-1 break-words text-sm fo
 export default function SourcesPanel({ messageId, citations, highlight }: {
   messageId: string; citations: Citation[]; highlight: string | null;
 }) {
+  useTranslation();
   const docs = citations.filter((c) => c.source_type === "document");
   const web = citations.filter((c) => c.source_type === "web");
   if (citations.length === 0) return null;
 
   return (
-    <div className={cn("grid gap-3", docs.length > 0 && web.length > 0 && "sm:grid-cols-2")} role="group" aria-label="Sources">
+    <div className={cn("grid gap-3", docs.length > 0 && web.length > 0 && "sm:grid-cols-2")} role="group" aria-label={tr("Sources")}>
       {docs.length > 0 && (
-        <section aria-label="Sources from your documents" className="min-w-0">
+        <section aria-label={tr("Sources from your documents")} className="min-w-0">
           <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-accent">
-            <FileText className="size-3.5" aria-hidden /> From your documents
+            <FileText className="size-3.5" aria-hidden /> {tr("From your documents")}
           </h4>
           <ul className="space-y-2">
             {docs.map((c) => (
@@ -57,7 +59,7 @@ export default function SourcesPanel({ messageId, citations, highlight }: {
                   ) : (
                     <span className="text-sm font-medium">{c.filename}</span>
                   )}
-                  {c.page_number != null && <span className="rounded-full bg-hover px-2 text-xs text-muted">page {c.page_number}</span>}
+                  {c.page_number != null && <span className="rounded-full bg-hover px-2 text-xs text-muted">{tr("page")} {c.page_number}</span>}
                 </p>
                 {c.snippet && <Excerpt text={c.snippet} />}
               </li>
@@ -66,9 +68,9 @@ export default function SourcesPanel({ messageId, citations, highlight }: {
         </section>
       )}
       {web.length > 0 && (
-        <section aria-label="Sources from the web" className="min-w-0">
+        <section aria-label={tr("Sources from the web")} className="min-w-0">
           <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-web">
-            <Globe className="size-3.5" aria-hidden /> From the web
+            <Globe className="size-3.5" aria-hidden /> {tr("From the web")}
           </h4>
           <ul className="space-y-2">
             {web.map((c) => (
