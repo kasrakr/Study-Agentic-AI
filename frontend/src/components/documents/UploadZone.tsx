@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { CheckCircle2, CircleAlert, CopyCheck, Loader2, UploadCloud } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { useToast } from "@/components/ui/Toast";
@@ -21,6 +22,7 @@ interface Item {
 let nextId = 1;
 
 export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
+  useTranslation();
   const [items, setItems] = useState<Item[]>([]);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,8 +37,8 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
     for (const [n, file] of files.entries()) {
       const item = queued[n];
       if (!EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext))) {
-        patch(item.id, { phase: "error", message: "Unsupported file type. Upload a PDF, TXT or Markdown file." });
-        toast.push(`${file.name}: unsupported file type.`, "error");
+        patch(item.id, { phase: "error", message: tr("Unsupported file type. Upload a PDF, TXT or Markdown file.") });
+        toast.push(`${file.name}: ${tr("Unsupported file type. Upload a PDF, TXT or Markdown file.")}`, "error");
         continue;
       }
       try {
@@ -44,9 +46,9 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
           patch(item.id, { progress: fraction, phase: fraction >= 1 ? "indexing" : "uploading" }),
         );
         patch(item.id, result.duplicate
-          ? { phase: "duplicate", progress: 1, message: "This exact file is already in your library." }
+          ? { phase: "duplicate", progress: 1, message: tr("This exact file is already in your library.") }
           : { phase: "done", progress: 1 });
-        toast.push(result.duplicate ? `${file.name} is already in your library.` : `${file.name} is ready to use.`, result.duplicate ? "info" : "success");
+        toast.push(result.duplicate ? `${file.name}: ${tr("This exact file is already in your library.")}` : `${file.name}: ${tr("Indexed")}`, result.duplicate ? "info" : "success");
         onUploaded();
       } catch (err) {
         patch(item.id, { phase: "error", message: errorMessage(err) });
@@ -63,7 +65,7 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
   }
 
   return (
-    <section aria-label="Upload documents">
+    <section aria-label={tr("Upload documents")}>
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false); }}
@@ -77,18 +79,18 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
           <UploadCloud className="size-6 text-accent" aria-hidden />
         </span>
         <p className="text-sm">
-          {dragging ? "Release to upload" : (
+          {dragging ? tr("Release to upload") : (
             <>
-              Drop files here or{" "}
+              {tr("Drop files here or")}{" "}
               <button type="button" className="font-medium text-accent underline underline-offset-2 transition-colors hover:text-ink" onClick={() => inputRef.current?.click()}>
-                choose files
+                {tr("choose files")}
               </button>
             </>
           )}
         </p>
-        <p className="text-xs text-muted">PDF, TXT or Markdown. Scanned PDFs without a text layer can’t be read.</p>
+        <p className="text-xs text-muted">{tr("PDF, TXT or Markdown. Scanned PDFs without a text layer can’t be read.")}</p>
         <input
-          ref={inputRef} type="file" accept={ACCEPT} multiple className="sr-only" aria-label="Choose files to upload"
+          ref={inputRef} type="file" accept={ACCEPT} multiple className="sr-only" aria-label={tr("Choose files to upload")}
           onChange={(e) => { if (e.target.files?.length) void handleFiles([...e.target.files]); e.target.value = ""; }}
         />
       </div>
@@ -101,16 +103,16 @@ export default function UploadZone({ onUploaded }: { onUploaded: () => void }) {
                 <StatusIcon phase={i.phase} />
                 <span className="min-w-0 flex-1 truncate font-medium">{i.name}</span>
                 <span className="shrink-0 text-xs text-muted">
-                  {i.phase === "uploading" && `Uploading ${Math.round(i.progress * 100)}%`}
+                  {i.phase === "uploading" && `${tr("Uploading")} ${Math.round(i.progress * 100)}%`}
                   {i.phase === "indexing" && "Indexing… (reading and embedding)"}
-                  {i.phase === "done" && `Indexed · ${formatBytes(i.size)}`}
+                  {i.phase === "done" && `${tr("Indexed")} · ${formatBytes(i.size)}`}
                   {i.phase === "duplicate" && "Already indexed"}
                   {i.phase === "error" && "Failed"}
                 </span>
               </div>
               {(i.phase === "uploading" || i.phase === "indexing") && (
                 <div
-                  role="progressbar" aria-label={`Upload progress for ${i.name}`} aria-valuemin={0} aria-valuemax={100}
+                  role="progressbar" aria-label={`${tr("Upload progress for")} ${i.name}`} aria-valuemin={0} aria-valuemax={100}
                   aria-valuenow={i.phase === "indexing" ? undefined : Math.round(i.progress * 100)}
                   className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-hover"
                 >

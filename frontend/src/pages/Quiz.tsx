@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import QuizResults from "@/components/quiz/QuizResults";
@@ -12,6 +13,7 @@ import type { AttemptResult, Quiz as QuizModel, QuizAnswer, QuizGenerateRequest 
 type View = { name: "setup" } | { name: "loading" } | { name: "taking"; quiz: QuizModel } | { name: "results"; quiz: QuizModel; result: AttemptResult };
 
 export default function Quiz() {
+  useTranslation();
   const docs = useDocuments();
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState<View>(params.get("quiz") ? { name: "loading" } : { name: "setup" });
@@ -59,11 +61,11 @@ export default function Quiz() {
 
   return (
     <div>
-      <PageHeader title="Quiz">Test yourself on your own material. Every question points back to the page it came from.</PageHeader>
+      <PageHeader title={tr("Quiz")}>{tr("Test yourself on your own material. Every question points back to the page it came from.")}</PageHeader>
 
-      {view.name === "loading" && <Spinner label="Opening quiz…" />}
+      {view.name === "loading" && <Spinner label={tr("Opening quiz…")} />}
       {view.name === "setup" && (
-        docs.status === "loading" ? <Spinner label="Loading documents…" /> :
+        docs.status === "loading" ? <Spinner label={tr("Loading documents…")} /> :
         docs.status === "error" ? <Notice tone="error">{docs.error.message}</Notice> :
         <QuizSetup key={params.toString()} documents={docs.indexed} initialDocIds={prefillDocs.filter((id) => docs.indexed.some((d) => d.id === id))}
                    initialTopic={params.get("topic") ?? ""} busy={busy} error={error} onGenerate={generate} />

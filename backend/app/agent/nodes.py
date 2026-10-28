@@ -332,7 +332,9 @@ class AgentNodes:
 
     @traced("respond_smalltalk")
     def respond_smalltalk(self, state: AgentState) -> dict[str, Any]:
-        answer = prompts.SMALLTALK_REPLY
+        # Use the language of the current question, without changing tool or API data.
+        persian = any("\u0600" <= ch <= "\u06ff" for ch in state.get("question", ""))
+        answer = prompts.SMALLTALK_REPLY_FA if persian else prompts.SMALLTALK_REPLY
         _writer()({"type": "token", "text": answer})
         return {"final_answer": answer, "answer_origin": "none", "answer_sources": [],
                 "messages": self._turn_messages(state, answer, {"answer_origin": "none"}, "respond_smalltalk"),

@@ -15,6 +15,10 @@
           var t = localStorage.getItem("study-agent:theme");
           if (t !== "light" && t !== "dark") t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
           document.documentElement.setAttribute("data-theme", t);
+          var locale = localStorage.getItem("study-agent:locale") === "fa" ? "fa" : "en";
+          document.documentElement.lang = locale;
+          document.documentElement.dir = locale === "fa" ? "rtl" : "ltr";
+          document.documentElement.dataset.locale = locale;
           if (t === "light") {
             document.querySelector('meta[name="color-scheme"]').setAttribute("content", "light");
             document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f7fb");

@@ -1,9 +1,11 @@
+import { useTranslation } from "@/i18n";
 import type { LucideIcon } from "lucide-react";
 
 /** A clickable starter. The parent decides whether it sends immediately or fills the composer for the student to finish. */
 export default function PromptSuggestion({ icon: Icon, title, hint, onSelect }: {
   icon: LucideIcon; title: string; hint: string; onSelect: () => void;
 }) {
+  useTranslation();
   return (
     <button
       type="button" onClick={onSelect}

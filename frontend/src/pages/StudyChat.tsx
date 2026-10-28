@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { ArrowDown, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -19,6 +20,8 @@ import { errorMessage, plural } from "@/lib/format";
 const NEAR_BOTTOM_PX = 120;
 
 export default function StudyChat() {
+  useTranslation();
+  const { locale } = useTranslation();
   const docs = useDocuments();
   const conversations = useAsync((signal) => api.listConversations(signal));
   const chat = useChat(conversations.reload);
@@ -85,8 +88,8 @@ export default function StudyChat() {
 
   const indexedCount = docs.indexed.length;
   const scopeLabel = useMemo(
-    () => (scope.length === 0 ? `Searching all ${plural(indexedCount, "document")}` : `Searching ${plural(scope.length, "selected document")}`),
-    [scope, indexedCount],
+    () => (scope.length === 0 ? `${tr("Searching all")} ${plural(indexedCount, "document")}` : `${tr("Searching")} ${plural(scope.length, "selected document")}`),
+    [scope, indexedCount, locale],
   );
   const systemState: SystemState = docs.status === "loading" ? "loading" : docs.status === "error" ? "unreachable" : "ready";
 
@@ -96,7 +99,7 @@ export default function StudyChat() {
       await api.deleteConversation(id);
       if (id === chat.conversationId) chat.reset();
       conversations.reload();
-      toast.push("Conversation deleted.", "success");
+      toast.push(tr("Conversation deleted."), "success");
     } catch (err) {
       setActionError(errorMessage(err));
     }
@@ -115,12 +118,12 @@ export default function StudyChat() {
   return (
     <div className="flex h-full min-h-0 flex-1">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line p-4 lg:flex">
-        <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.08em] text-faint">Conversations</h2>
+        <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.08em] text-faint">{tr("Conversations")}</h2>
         {list}
       </aside>
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Conversations">{list}</Drawer>
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title={tr("Conversations")}>{list}</Drawer>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Study chat">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label={tr("Study chat")}>
         <ChatHeader
           state={systemState} indexedCount={indexedCount} busy={chat.busy}
           onOpenConversations={() => setDrawerOpen(true)} onNew={chat.reset} newDisabled={chat.busy || chat.messages.length === 0}
@@ -130,11 +133,11 @@ export default function StudyChat() {
           <details className="group">
             <summary className="flex w-fit max-w-full cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-hover px-3 py-1.5 text-xs text-muted transition-colors hover:border-line-strong hover:text-ink [&::-webkit-details-marker]:hidden">
               <ChevronDown className="size-3.5 shrink-0 transition-transform duration-200 group-open:rotate-180" aria-hidden />
-              <span className="truncate">{docs.status === "loading" ? "Loading documents…" : scopeLabel}</span>
+              <span className="truncate">{docs.status === "loading" ? tr("Loading documents…") : scopeLabel}</span>
             </summary>
             <div className="mt-3 max-w-xl animate-fade-in pb-1">
-              <DocumentPicker documents={docs.indexed} selected={scope} onChange={setScope} legend="Limit to these documents (none selected = all)" />
-              <p className="mt-2 text-xs text-faint">Answers come from your uploaded documents first. The web is searched only if they don’t contain enough.</p>
+              <DocumentPicker documents={docs.indexed} selected={scope} onChange={setScope} legend={tr("Limit to these documents (none selected = all)")} />
+              <p className="mt-2 text-xs text-faint">{tr("Answers come from your uploaded documents first. The web is searched only if they don’t contain enough.")}</p>
             </div>
           </details>
         </div>
@@ -142,7 +145,7 @@ export default function StudyChat() {
         {(chat.loadError || actionError) && <Notice tone="error" className="mx-3 mt-3 sm:mx-5">{chat.loadError ?? actionError}</Notice>}
 
         <div className="relative min-h-0 flex-1">
-          <div ref={scroller} onScroll={onScroll} className="absolute inset-0 overflow-y-auto overscroll-contain px-3 sm:px-5" role="log" aria-live="off" aria-label="Conversation">
+          <div ref={scroller} onScroll={onScroll} className="absolute inset-0 overflow-y-auto overscroll-contain px-3 sm:px-5" role="log" aria-live="off" aria-label={tr("Conversation")}>
             <div className="mx-auto min-h-full max-w-3xl">
               {chat.messages.length === 0 ? (
                 <ChatEmptyState indexedCount={indexedCount} loading={docs.status === "loading"} onPick={pick} />
@@ -156,7 +159,7 @@ export default function StudyChat() {
 
           {showJump && (
             <button
-              type="button" onClick={jumpToLatest} aria-label="Jump to the latest message" data-tip="Jump to latest"
+              type="button" onClick={jumpToLatest} aria-label={tr("Jump to the latest message")} data-tip={tr("Jump to latest")}
               className="tip glass-strong absolute bottom-3 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full text-ink transition-transform hover:-translate-y-0.5 active:scale-95 animate-fade-in"
             >
               <ArrowDown className="size-4" aria-hidden />

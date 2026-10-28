@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { FileUp, GraduationCap, Layers, Lightbulb, ListChecks, type LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { buttonClass } from "@/components/ui/Button";
@@ -34,25 +35,26 @@ function Orb() {
 export default function ChatEmptyState({ indexedCount, loading, onPick }: {
   indexedCount: number; loading: boolean; onPick: (starter: Starter) => void;
 }) {
+  useTranslation();
   return (
     <div className="mx-auto flex min-h-full max-w-2xl flex-col justify-center px-1 py-8 text-center animate-fade-up">
       <Orb />
     <h2 className="text-gradient mt-6 mb-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-      What are you studying today?
+      {tr("What are you studying today?")}
     </h2>
       <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted sm:text-base">
-        Ask questions about your notes, get step-by-step explanations with cited pages, and turn your material into quizzes and flashcards.
+        {tr("Ask questions about your notes, get step-by-step explanations with cited pages, and turn your material into quizzes and flashcards.")}
       </p>
 
       {loading ? null : indexedCount === 0 ? (
         <div className="glass mx-auto mt-8 max-w-md rounded-2xl p-5">
-          <p className="text-sm leading-relaxed text-muted">You haven’t indexed any documents yet. Upload some in the Library for page-level citations.</p>
-          <Link to="/library" className={`${buttonClass("primary")} mt-4`}><FileUp className="size-4" aria-hidden /> Go to the Library</Link>
+          <p className="text-sm leading-relaxed text-muted">{tr("You haven’t indexed any documents yet. Upload some in the Library for page-level citations.")}</p>
+          <Link to="/library" className={`${buttonClass("primary")} mt-4`}><FileUp className="size-4" aria-hidden /> {tr("Go to the Library")}</Link>
         </div>
       ) : (
         <div className="mt-8 grid gap-3 text-left sm:grid-cols-2">
           {STARTERS.map((s) => (
-            <PromptSuggestion key={s.title} icon={s.icon} title={s.title} hint={s.hint} onSelect={() => onPick(s)} />
+            <PromptSuggestion key={s.title} icon={s.icon} title={tr(s.title)} hint={tr(s.hint)} onSelect={() => onPick({ ...s, prompt: tr(s.prompt) })} />
           ))}
         </div>
       )}

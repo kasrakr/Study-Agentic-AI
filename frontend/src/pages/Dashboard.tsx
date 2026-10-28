@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { BookOpenText, FileText, FileUp, Layers, ListChecks, MessageSquareText, Target, type LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import SystemStatus from "@/components/dashboard/SystemStatus";
@@ -35,20 +36,20 @@ function Overview({ p }: { p: Progress }) {
   return (
     <>
       <dl className="grid gap-3 sm:grid-cols-3">
-        <Stat icon={FileText} label="Indexed documents" value={String(p.indexed_documents)} />
-        <Stat icon={ListChecks} label="Average quiz score" value={avg == null ? "—" : `${Math.round(avg)}%`} hint={plural(p.quiz.attempts, "attempt")} />
-        <Stat icon={Layers} label="Flashcards rated" value={String(p.flashcards.rated)} hint={p.flashcards.rated ? `${p.flashcards.difficult} difficult` : undefined} />
+        <Stat icon={FileText} label={tr("Indexed documents")} value={String(p.indexed_documents)} />
+        <Stat icon={ListChecks} label={tr("Average quiz score")} value={avg == null ? "—" : `${Math.round(avg)}%`} hint={plural(p.quiz.attempts, "attempt")} />
+        <Stat icon={Layers} label={tr("Flashcards rated")} value={String(p.flashcards.rated)} hint={p.flashcards.rated ? `${p.flashcards.difficult} ${tr("difficult")}` : undefined} />
       </dl>
 
-      <section className="mt-6" aria-label="Quick actions">
+      <section className="mt-6" aria-label={tr("Quick actions")}>
         <div className="flex flex-wrap gap-2">
           {empty ? (
-            <Link to="/library" className={buttonClass("primary")}><FileUp className="size-4" aria-hidden /> Upload your first document</Link>
+            <Link to="/library" className={buttonClass("primary")}><FileUp className="size-4" aria-hidden /> {tr("Upload your first document")}</Link>
           ) : (
             <>
-              <Link to="/chat" className={buttonClass("primary")}><MessageSquareText className="size-4" aria-hidden /> Ask a question</Link>
-              <Link to="/quiz" className={buttonClass("secondary")}><ListChecks className="size-4" aria-hidden /> Generate a quiz</Link>
-              <Link to="/flashcards" className={buttonClass("secondary")}><Layers className="size-4" aria-hidden /> Make flashcards</Link>
+              <Link to="/chat" className={buttonClass("primary")}><MessageSquareText className="size-4" aria-hidden /> {tr("Ask a question")}</Link>
+              <Link to="/quiz" className={buttonClass("secondary")}><ListChecks className="size-4" aria-hidden /> {tr("Generate a quiz")}</Link>
+              <Link to="/flashcards" className={buttonClass("secondary")}><Layers className="size-4" aria-hidden /> {tr("Make flashcards")}</Link>
             </>
           )}
         </div>
@@ -56,16 +57,16 @@ function Overview({ p }: { p: Progress }) {
 
       <div className="mt-10 grid gap-8 lg:grid-cols-2">
         <section aria-labelledby="scores-heading">
-          <h2 id="scores-heading" className="text-lg font-semibold tracking-tight">Recent quiz scores</h2>
+          <h2 id="scores-heading" className="text-lg font-semibold tracking-tight">{tr("Recent quiz scores")}</h2>
           {p.quiz.recent.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">No quizzes taken yet.</p>
+            <p className="mt-2 text-sm text-muted">{tr("No quizzes taken yet.")}</p>
           ) : (
             <ul className="mt-3 space-y-2.5">
               {p.quiz.recent.slice(0, 6).map((a) => (
                 <li key={a.attempt_id}>
                   <div className="flex items-baseline justify-between gap-3 text-sm">
                     <span className="truncate">{a.quiz_title}</span>
-                    <span className="shrink-0 font-medium">{Math.round(a.score_percent)}%{a.graded_by_model && <span className="ml-1 text-xs font-normal text-muted" title="Includes AI-graded short answers">(AI-graded part)</span>}</span>
+                    <span className="shrink-0 font-medium">{Math.round(a.score_percent)}%{a.graded_by_model && <span className="ml-1 text-xs font-normal text-muted" title={tr("Includes AI-graded short answers")}>{tr("(AI-graded part)")}</span>}</span>
                   </div>
                   <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-hover" role="img" aria-label={`${Math.round(a.score_percent)} percent`}>
                     <div className="h-full rounded-full bg-gradient-to-r from-brand to-cyan transition-[width] duration-500" style={{ width: `${a.score_percent}%` }} />
@@ -78,7 +79,7 @@ function Overview({ p }: { p: Progress }) {
         </section>
 
         <section aria-labelledby="review-heading">
-          <h2 id="review-heading" className="flex items-center gap-2 text-lg font-semibold tracking-tight"><Target className="size-5 text-accent" aria-hidden /> Suggested topics to review</h2>
+          <h2 id="review-heading" className="flex items-center gap-2 text-lg font-semibold tracking-tight"><Target className="size-5 text-accent" aria-hidden /> {tr("Suggested topics to review")}</h2>
           {p.weak_topics.length === 0 ? (
             <p className="mt-2 text-sm text-muted">{p.weak_topics_note ?? "No weak topics detected from your results so far."}</p>
           ) : (
@@ -92,7 +93,7 @@ function Overview({ p }: { p: Progress }) {
                   {w.documents.length > 0 && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Link to={`/quiz?topic=${encodeURIComponent(w.topic)}&docs=${w.documents.map((d) => d.document_id).join(",")}`} className={buttonClass("secondary", "sm")}>
-                        Practice this topic
+                        {tr("Practice this topic")}
                       </Link>
                       <span className="text-xs text-muted">in {w.documents.map((d) => d.filename).join(", ")}</span>
                     </div>
@@ -102,22 +103,22 @@ function Overview({ p }: { p: Progress }) {
             </ul>
           )}
           <details className="mt-3 text-xs text-muted">
-            <summary className="cursor-pointer">How are these chosen?</summary>
+            <summary className="cursor-pointer">{tr("How are these chosen?")}</summary>
             <p className="mt-1.5 max-w-prose">{p.weak_topics_method}</p>
           </details>
         </section>
       </div>
 
       <section className="mt-10" aria-labelledby="activity-heading">
-        <h2 id="activity-heading" className="text-lg font-semibold tracking-tight">Recent activity</h2>
+        <h2 id="activity-heading" className="text-lg font-semibold tracking-tight">{tr("Recent activity")}</h2>
         {p.recent_activity.length === 0 ? (
-          <p className="mt-2 text-sm text-muted">Nothing yet. Upload a document to get started.</p>
+          <p className="mt-2 text-sm text-muted">{tr("Nothing yet. Upload a document to get started.")}</p>
         ) : (
           <ul className="glass mt-3 divide-y divide-line overflow-hidden rounded-2xl">
             {p.recent_activity.map((a) => (
               <li key={`${a.type}-${a.ref_id}-${a.at}`}>
                 <Link to={ACTIVITY_LINK[a.type](a.ref_id)} className="flex items-baseline justify-between gap-3 px-4 py-3 text-sm transition-colors hover:bg-hover">
-                  <span className="min-w-0 truncate"><span className="mr-2 text-xs font-semibold uppercase tracking-[0.08em] text-accent">{ACTIVITY_VERB[a.type]}</span>{a.title}</span>
+                  <span className="min-w-0 truncate"><span className="mr-2 text-xs font-semibold uppercase tracking-[0.08em] text-accent">{tr(ACTIVITY_VERB[a.type])}</span>{a.title}</span>
                   <span className="shrink-0 text-xs text-muted">{timeAgo(a.at)}</span>
                 </Link>
               </li>
@@ -130,14 +131,15 @@ function Overview({ p }: { p: Progress }) {
 }
 
 export default function Dashboard() {
+  useTranslation();
   const progress = useAsync((signal) => api.progress(signal));
   return (
     <div>
       <header className="mb-8 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-gradient text-3xl font-semibold tracking-tight sm:text-[2.1rem]">Dashboard</h1>
+          <h1 className="text-gradient text-3xl font-semibold tracking-tight sm:text-[2.1rem]">{tr("Dashboard")}</h1>
           <p className="mt-2 inline-flex items-center gap-2 leading-relaxed text-muted">
-            <BookOpenText className="size-4 shrink-0 text-accent" aria-hidden /> Your study progress at a glance.
+            <BookOpenText className="size-4 shrink-0 text-accent" aria-hidden /> {tr("Your study progress at a glance.")}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-0.5">
@@ -147,19 +149,19 @@ export default function Dashboard() {
 
       {progress.status === "loading" && (
         <div className="space-y-3">
-          <Spinner label="Loading your progress…" />
+          <Spinner label={tr("Loading your progress…")} />
           <div className="grid gap-3 sm:grid-cols-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div>
         </div>
       )}
       {progress.status === "error" && (
-        <Notice tone="error" title="Couldn’t load your progress">
+        <Notice tone="error" title={tr("Couldn’t load your progress")}>
           {progress.error.message} Check that the backend is running (<code>uvicorn app.main:create_app --factory --reload</code>).
         </Notice>
       )}
       {progress.status === "success" && <Overview p={progress.data} />}
 
       <details className="glass group mt-12 rounded-2xl px-4 py-3">
-        <summary className="cursor-pointer rounded-lg text-sm font-medium text-muted transition-colors hover:text-ink">System status and connection check</summary>
+        <summary className="cursor-pointer rounded-lg text-sm font-medium text-muted transition-colors hover:text-ink">{tr("System status and connection check")}</summary>
         <div className="mt-2"><SystemStatus /></div>
       </details>
     </div>

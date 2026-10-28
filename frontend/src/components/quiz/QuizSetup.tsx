@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { useState } from "react";
 import DocumentPicker from "@/components/documents/DocumentPicker";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
   documents: StudyDocument[]; initialDocIds: string[]; initialTopic: string; busy: boolean; error: string | null;
   onGenerate: (req: QuizGenerateRequest) => void;
 }) {
+  useTranslation();
   const [docIds, setDocIds] = useState<string[]>(initialDocIds);
   const [count, setCount] = useState(5);
   const [types, setTypes] = useState<QuestionType[]>(["multiple_choice"]);
@@ -33,22 +35,22 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
         if (valid) onGenerate({ document_ids: docIds, question_count: count, question_types: types, difficulty, topic: topic.trim() || undefined });
       }}
     >
-      <DocumentPicker documents={documents} selected={docIds} onChange={setDocIds} legend="Create the quiz from" />
+      <DocumentPicker documents={documents} selected={docIds} onChange={setDocIds} legend={tr("Create the quiz from")} />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="q-count" className="text-sm font-medium">Number of questions</label>
+          <label htmlFor="q-count" className="text-sm font-medium">{tr("Number of questions")}</label>
           <input id="q-count" type="number" min={1} max={20} value={count}
                  onChange={(e) => setCount(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
                  className="mt-1.5 block w-24 field" />
         </div>
         <fieldset>
-          <legend className="text-sm font-medium">Difficulty</legend>
+          <legend className="text-sm font-medium">{tr("Difficulty")}</legend>
           <div className="mt-1.5 glass inline-flex overflow-hidden rounded-xl" role="radiogroup">
             {DIFFICULTIES.map((d) => (
               <label key={d} className={cn("cursor-pointer px-3.5 py-2 text-sm capitalize transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent", difficulty === d ? "bg-brand-gradient text-white" : "hover:bg-hover")}>
                 <input type="radio" name="difficulty" value={d} checked={difficulty === d} onChange={() => setDifficulty(d)} className="sr-only" />
-                {d}
+                {tr(d)}
               </label>
             ))}
           </div>
@@ -56,30 +58,30 @@ export default function QuizSetup({ documents, initialDocIds, initialTopic, busy
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium">Question types</legend>
+        <legend className="text-sm font-medium">{tr("Question types")}</legend>
         <div className="mt-1.5 flex flex-wrap gap-2">
           {TYPES.map((t) => (
             <label key={t.value} className={cn("flex cursor-pointer items-start gap-2 rounded-xl border px-3 py-2 text-sm transition-colors", types.includes(t.value) ? "border-accent/60 bg-accent-soft" : "border-line hover:bg-hover")}>
               <input type="checkbox" checked={types.includes(t.value)} onChange={() => toggleType(t.value)} className="mt-0.5 size-4 accent-[var(--color-brand)]" />
-              <span>{t.label}<span className="block text-xs text-muted">{t.hint}</span></span>
+              <span>{tr(t.label)}<span className="block text-xs text-muted">{tr(t.hint)}</span></span>
             </label>
           ))}
         </div>
       </fieldset>
 
       <div>
-        <label htmlFor="q-topic" className="text-sm font-medium">Focus on a topic <span className="font-normal text-muted">(optional)</span></label>
-        <input id="q-topic" value={topic} maxLength={200} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. cellular respiration"
+        <label htmlFor="q-topic" className="text-sm font-medium">{tr("Focus on a topic")} <span className="font-normal text-muted">{tr("(optional)")}</span></label>
+        <input id="q-topic" value={topic} maxLength={200} onChange={(e) => setTopic(e.target.value)} placeholder={tr("e.g. cellular respiration")}
                className="mt-1.5 block w-full field" />
       </div>
 
-      {error && <Notice tone="error" title="Couldn’t create the quiz">{error}</Notice>}
+      {error && <Notice tone="error" title={tr("Couldn’t create the quiz")}>{error}</Notice>}
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={!valid} loading={busy}>{busy ? "Creating quiz…" : "Create quiz"}</Button>
-        {busy && <span className="text-sm text-muted" role="status">This can take 10–30 seconds.</span>}
-        {!busy && !valid && <span className="text-sm text-muted">Select at least one document and one question type.</span>}
+        <Button type="submit" disabled={!valid} loading={busy}>{busy ? tr("Creating quiz…") : tr("Create quiz")}</Button>
+        {busy && <span className="text-sm text-muted" role="status">{tr("This can take 10–30 seconds.")}</span>}
+        {!busy && !valid && <span className="text-sm text-muted">{tr("Select at least one document and one question type.")}</span>}
       </div>
-      <p className="text-xs text-muted">Questions are based only on the selected documents, not on web content.</p>
+      <p className="text-xs text-muted">{tr("Questions are based only on the selected documents, not on web content.")}</p>
     </form>
   );
 }
