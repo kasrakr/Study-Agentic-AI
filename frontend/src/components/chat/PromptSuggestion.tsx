@@ -1,4 +1,4 @@
-import { tr, useTranslation } from "@/i18n";
+import { useTranslation } from "@/i18n";
 import type { LucideIcon } from "lucide-react";
 
 /** A clickable starter. The parent decides whether it sends immediately or fills the composer for the student to finish. */
