@@ -1,3 +1,4 @@
+import { tr, useTranslation } from "@/i18n";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/feedback";
@@ -21,6 +22,7 @@ export function toAnswers(quiz: Quiz, drafts: Record<string, Draft>): QuizAnswer
 export default function QuizTaker({ quiz, busy, error, onSubmit }: {
   quiz: Quiz; busy: boolean; error: string | null; onSubmit: (answers: QuizAnswer[]) => void;
 }) {
+  useTranslation();
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const set = (id: string, d: Draft) => setDrafts((cur) => ({ ...cur, [id]: d }));
   const answered = quiz.questions.filter((q) => isAnswered(q, drafts[q.id])).length;
@@ -30,7 +32,7 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(toAnswers(quiz, drafts)); }} className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xl font-semibold">{quiz.title}</h2>
-        <p className="text-sm text-muted" aria-live="polite">{answered} of {quiz.question_count} answered · {quiz.difficulty}</p>
+        <p className="text-sm text-muted" aria-live="polite">{answered} of {quiz.question_count} answered · {tr(quiz.difficulty)}</p>
       </div>
 
       <ol className="space-y-4">
@@ -51,14 +53,14 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
                   {q.type === "true_false" && [true, false].map((v) => (
                     <label key={String(v)} className={cn("flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition-colors", d?.bool === v ? "border-accent bg-accent-soft" : "border-line hover:bg-hover")}>
                       <input type="radio" name={q.id} checked={d?.bool === v} onChange={() => set(q.id, { bool: v })} className="accent-[var(--color-brand)]" />
-                      {v ? "True" : "False"}
+                      {v ? tr("True") : tr("False")}
                     </label>
                   ))}
                   {q.type === "short_answer" && (
                     <>
                       <label htmlFor={`a-${q.id}`} className="sr-only">Your answer to question {q.position}</label>
                       <textarea id={`a-${q.id}`} rows={3} maxLength={4000} value={d?.text ?? ""} onChange={(e) => set(q.id, { text: e.target.value })}
-                                placeholder="Write your answer in a sentence or two…" className="w-full field text-sm" />
+                                placeholder={tr("Write your answer in a sentence or two…")} className="w-full field text-sm" />
                     </>
                   )}
                 </div>
@@ -68,9 +70,9 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
         })}
       </ol>
 
-      {error && <Notice tone="error" title="Couldn’t submit your answers">{error}</Notice>}
+      {error && <Notice tone="error" title={tr("Couldn’t submit your answers")}>{error}</Notice>}
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" loading={busy}>{busy ? (hasShort ? "Grading…" : "Submitting…") : "Submit answers"}</Button>
+        <Button type="submit" loading={busy}>{busy ? (hasShort ? tr("Grading…") : tr("Submitting…")) : tr("Submit answers")}</Button>
         {answered < quiz.question_count && <span className="text-sm text-muted">{quiz.question_count - answered} unanswered will score 0.</span>}
       </div>
     </form>
