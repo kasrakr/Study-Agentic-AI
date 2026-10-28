@@ -62,7 +62,7 @@ export default function Flashcards() {
                        className="mt-1.5 block w-24 field" />
               </div>
               <div>
-                <label htmlFor="f-topic" className="text-sm font-medium">Topic <span className="font-normal text-muted">{tr("(optional)")}</span></label>
+                <label htmlFor="f-topic" className="text-sm font-medium">{tr("Topic")} <span className="font-normal text-muted">{tr("(optional)")}</span></label>
                 <input id="f-topic" value={topic} maxLength={200} onChange={(e) => setTopic(e.target.value)}
                        className="mt-1.5 block w-full field" />
               </div>
