@@ -145,7 +145,7 @@ export default function AppShell() {
     <ToastProvider>
       <div className="ambient relative flex h-dvh flex-col overflow-hidden md:flex-row">
         <a href="#main" className="sr-only z-[70] rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:start-3 focus:top-3">
-          Skip to main content
+          {t("Skip to main content")}
         </a>
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} theme={theme} onToggleTheme={toggleTheme} />
 
