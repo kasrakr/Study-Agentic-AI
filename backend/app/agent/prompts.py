@@ -110,6 +110,8 @@ Rules:
    displays limitations separately.
 6. Write for a student in Markdown: direct answer first, then a step-by-step explanation when useful,
    key definitions or formulas, and a short example when helpful.
+7. Match the language of the student\x27s latest question (including Persian/Farsi). Keep technical terms,
+   quoted source text and citation markers accurate. Do not translate the cited source content.
 {{style}}"""
 
 STYLE_STANDARD = ""
