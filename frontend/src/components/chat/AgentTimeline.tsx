@@ -27,7 +27,7 @@ function StepList({ steps }: { steps: StepState[] }) {
         const running = s.phase === "running";
         const isWeb = s.step === "web_search";
         return (
-          <li key={`${s.step}-${i}`} className={cn("relative flex items-start gap-2.5 pb-2.5 text-xs last:pb-0", i < steps.length - 1 && "before:absolute before:left-[0.69rem] before:top-6 before:bottom-0 before:w-px before:bg-line")}>
+          <li key={`${s.step}-${i}`} className={cn("relative flex items-start gap-2.5 pb-2.5 text-xs last:pb-0", i < steps.length - 1 && "before:absolute before:start-[0.69rem] before:top-6 before:bottom-0 before:w-px before:bg-line")}>
             <span className={cn(
               "relative z-10 grid size-[1.4rem] shrink-0 place-items-center rounded-full ring-1 ring-inset transition-colors duration-300",
               running ? "bg-accent-soft text-accent ring-accent/40" : isWeb ? "bg-web-soft text-web ring-web/30" : "bg-hover text-muted ring-line",
@@ -70,7 +70,7 @@ export default function AgentTimeline({ steps, streaming }: { steps: StepState[]
       <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-md text-xs text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
         <ChevronRight className="size-3.5 transition-transform duration-200 group-open:rotate-90" aria-hidden />
         {tr("Agent activity")} · {plural(steps.length, "step")}{seconds ? ` · ${seconds.toFixed(1)}s` : ""}
-        {searchedWeb && <span className="ml-1 inline-flex items-center gap-1 text-web"><Globe className="size-3" aria-hidden /> {tr("web search used")}</span>}
+        {searchedWeb && <span className="ms-1 inline-flex items-center gap-1 text-web"><Globe className="size-3" aria-hidden /> {tr("web search used")}</span>}
       </summary>
       <div className="pb-1 pt-3 animate-fade-in"><StepList steps={steps} /></div>
     </details>
