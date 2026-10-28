@@ -37,7 +37,7 @@ export default function ConversationList({ conversations, activeId, onOpen, onDe
                 <span className="block text-xs text-faint">{timeAgo(c.updated_at)}</span>
               </button>
               <button type="button" onClick={() => onDelete(c.id)} aria-label={`${tr("Delete conversation")} ${c.title}`}
-                      className="me-1 rounded-sg p-1.5 text-muted opacity-0 transition-all hover:bg-danger-soft hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 max-lg:opacity-70">
+                      className="me-1 rounded-lg p-1.5 text-muted opacity-0 transition-all hover:bg-danger-soft hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 max-lg:opacity-70">
                 <Trash2 className="size-3.5" aria-hidden />
               </button>
             </li>
