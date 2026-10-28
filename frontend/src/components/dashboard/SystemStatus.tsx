@@ -61,8 +61,7 @@ function OpenAICheck() {
         {tr("Verify OpenAI access")}
       </h2>
       <p className="mt-1 max-w-prose text-sm text-muted">
-        {tr("Sends one tiny embedding request and one tiny chat request using the key in")} <code>backend/.env</code>. Costs a
-        {tr("Costs a fraction of a cent.")}
+        {tr("Sends one tiny embedding request and one tiny chat request using the key in")} <code>backend/.env</code>. {tr("Costs a fraction of a cent.")}
       </p>
       <button
         type="button"
