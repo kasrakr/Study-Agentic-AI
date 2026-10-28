@@ -69,7 +69,7 @@ export default function FlashcardViewer({ deck: initial, onNewDeck }: { deck: De
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <Button onClick={() => { setOrder(cards.map((c) => c.id)); setIndex(0); setRevealed(false); }}><RotateCcw className="size-4" aria-hidden /> {tr("Study again")}</Button>
-          {hard.length > 0 && <Button variant="secondary" onClick={() => { setOrder(hard); setIndex(0); setRevealed(false); }}>Only difficult ({hard.length})</Button>}
+          {hard.length > 0 && <Button variant="secondary" onClick={() => { setOrder(hard); setIndex(0); setRevealed(false); }}>{tr("Only difficult")} ({hard.length})</Button>}
           <Button variant="ghost" onClick={onNewDeck}>{tr("New deck")}</Button>
         </div>
       </section>
