@@ -251,6 +251,7 @@ export const fa: Record<string, string> = {
   "Incorrect": "نادرست",
   "AI-graded": "تصحیح با هوش مصنوعی",
   "Your answer:": "پاسخ شما:",
+  "Your answer to question": "پاسخ شما به سؤال"
   "Model answer:": "پاسخ نمونه:",
   "Correct answer:": "پاسخ درست:",
   "Feedback:": "بازخورد:",
