@@ -32,7 +32,7 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(toAnswers(quiz, drafts)); }} className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xl font-semibold">{quiz.title}</h2>
-        <p className="text-sm text-muted" aria-live="polite">{answered} of {quiz.question_count} answered · {tr(quiz.difficulty)}</p>
+        <p className="text-sm text-muted" aria-live="polite">{answered} {tr("of")} {quiz.question_count} {tr("answered")} · {tr(quiz.difficulty)}</p>
       </div>
 
       <ol className="space-y-4">
@@ -73,7 +73,7 @@ export default function QuizTaker({ quiz, busy, error, onSubmit }: {
       {error && <Notice tone="error" title={tr("Couldn’t submit your answers")}>{error}</Notice>}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" loading={busy}>{busy ? (hasShort ? tr("Grading…") : tr("Submitting…")) : tr("Submit answers")}</Button>
-        {answered < quiz.question_count && <span className="text-sm text-muted">{quiz.question_count - answered} unanswered will score 0.</span>}
+        {answered < quiz.question_count && <span className="text-sm text-muted">{quiz.question_count - answered} {tr("unanswered will score 0.")}</span>}
       </div>
     </form>
   );
