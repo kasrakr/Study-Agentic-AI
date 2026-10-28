@@ -22,7 +22,7 @@ export default function ChatHeader({ state, indexedCount, busy, onOpenConversati
   const dot = busy ? "bg-accent animate-dot" : state === "ready" ? "bg-ok" : state === "unreachable" ? "bg-danger" : "bg-faint";
 
   return (
-    <header className="flex items-center gap-3 border-b border-sine px-3 py-3 sm:px-5">
+    <header className="flex items-center gap-3 border-b border-line px-3 py-3 sm:px-5">
       <button
         type="button" onClick={onOpenConversations} aria-label={tr("Open conversations")} data-tip={tr("Conversations")}
         className="tip -ms-1 grid size-9 place-items-center rounded-xl text-muted transition-colors hover:bg-hover hover:text-ink lg:hidden"
@@ -34,7 +34,7 @@ export default function ChatHeader({ state, indexedCount, busy, onOpenConversati
         <h1 className="truncate text-[1.05rem] font-semibold leading-tight tracking-tight">{tr("Study Agent")}</h1>
         <p className="truncate text-xs text-muted">{tr("Your intelligent study companion")}</p>
       </div>
-      <p className="hidden items-center gap-2 rounded-full border border-sine bg-hover px-3 py-1 text-xs text-muted md:flex" role="status">
+      <p className="hidden items-center gap-2 rounded-full border border-line bg-hover px-3 py-1 text-xs text-muted md:flex" role="status">
         <span className={cn("size-1.5 rounded-full", dot)} aria-hidden />
         {label}
       </p>
