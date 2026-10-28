@@ -48,7 +48,7 @@ export default function Quiz() {
     setBusy(true);
     setError(null);
     try {
-      setView({ name: tr("results"), quiz, result: await api.submitQuiz(quiz.id, answers) });
+      setView({ name: "results", quiz, result: await api.submitQuiz(quiz.id, answers) });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
