@@ -23,7 +23,7 @@ const ORIGIN: Record<AnswerOrigin, { text: string; tone: "accent" | "web" | "neu
 function UserMessage({ content }: { content: string }) {
   return (
     <div className="flex justify-end animate-fade-up">
-      <p className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md border border-accent/25 bg-tint px-4 py-2.5 text-[0.95rem] leading-relaxed shadow-glass sm:max-w-[75%]">
+      <p className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-be-md border border-accent/25 bg-tint px-4 py-2.5 text-[0.95rem] leading-relaxed shadow-glass sm:max-w-[75%]">
         {content}
       </p>
     </div>
@@ -87,7 +87,7 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
         {message.status === "error" && <Notice tone="error" title={tr("This answer couldn’t be completed")}>{message.error}</Notice>}
 
         {message.status === "done" && message.content && (
-          <div className="-ml-1.5 flex items-center gap-0.5">
+          <div className="-ms-1.5 flex items-center gap-0.5">
             <CopyButton text={message.content} label={tr("Copy answer")} />
           </div>
         )}
