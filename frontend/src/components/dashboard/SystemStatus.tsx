@@ -71,14 +71,14 @@ function OpenAICheck() {
         className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2 text-sm font-medium text-white shadow-glow transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-60"
       >
         {state.status === "running" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <ShieldCheck className="size-4" aria-hidden />}
-        {state.status === "running" ? "Checking…" : "Check connection"}
+        {state.status === "running" ? tr("Checking…") : tr("Check connection")}
       </button>
 
       <div aria-live="polite" className="mt-4">
         {state.status === "done" && (
           <ul className="glass rounded-2xl px-4 py-2">
-            <ProbeLine name="Embeddings" probe={state.result.embedding} />
-            <ProbeLine name="Chat" probe={state.result.chat} />
+            <ProbeLine name={tr("Embeddings")} probe={state.result.embedding} />
+            <ProbeLine name={tr("Chat")} probe={state.result.chat} />
           </ul>
         )}
         {state.status === "error" && (
