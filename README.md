@@ -2,6 +2,8 @@
 
 <div align="center">
 
+[![English](https://img.shields.io/badge/Language-English-2563EB?style=for-the-badge)](README.md) [![فارسی](https://img.shields.io/badge/زبان-فارسی-7C3AED?style=for-the-badge)](README.fa.md)
+
 <img src="docs/images/banner.png" alt="Study Agent logo" width="710" />
 
 # 🎓 Study Agentic AI
